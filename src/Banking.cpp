@@ -1,4 +1,6 @@
+// Anthony Nagy - COMS-280-WWW02 - Final Project
 #include <iostream>
+#include <windows.h>
 
 using namespace std;
 
@@ -27,6 +29,12 @@ class Account_Management
         // Interger Array for essential account information, or identifiers, using a fixed set of data. The array consists of 4 values, given the removal of unnessesary information, the customer name and balance, and adding an additional 'member number', assigned by the Bank for internal use.
         int E_Account_Info[4];
         
+        // Basic Account Info struct, used to combine multiple data types, to present general information to the user, about their account. (work in progress)
+        struct B_Account_Info{
+            int Num;
+            string Name;
+            double Balance; 
+        };
 
     public:
         // Fucntion Clear_Acc_Info is used, with true boolean 'Clear_Info', to ensure that account information is always returned to default states.
@@ -38,20 +46,23 @@ class Account_Management
                 Acc_Birthyear = 1234;
                 Acc_Balance = 0;
                 Acc_Rec_Key = 123456;
-                E_Account_Info[Acc_Create_Num, Acc_Num, Acc_Birthyear, Acc_Rec_Key];
+                int E_Account_Info[4] = {Acc_Create_Num, Acc_Num, Acc_Birthyear, Acc_Rec_Key};
             }
         }
 
-        // Basic Account Info struct, used to combine multiple data types, to present general information to the user, about their account. (work in progress)
-        struct B_Account_Info{
-            int Acc_Num;
-            string Acc_Name;
-            double Acc_Balance; 
-        };
+
 
         // Create_Acc is used to create a new account, and list it within the system. (will output to txt file with persistant log by Phase 2)
         int Create_Acc(){
-            cout << "Welcome to the Account Creation Menu, you will be asked various questions that are neccessary to complete an account. \nAt the end of this process, you will be provided with an account recovery key, which must be kept safe at all times, in case your account needs to be recovered.\n";
+            bool Press_Enter = false;
+            cout << "Welcome to the Account Creation Menu, you will be asked various questions that are neccessary to complete an account. \nAt the end of this process, you will be provided with an account recovery key, which must be kept safe at all times, in case your account needs to be recovered.\nPlease press any key to continue.\n";
+            while(Press_Enter == false){
+                if (GetAsyncKeyState(VK_RETURN) & 0x8000) {
+                    std::cout << "Enter key pressed!" << std::endl;
+                    // Small delay to avoid program error.
+                    Sleep(200);
+                }
+            }
         }
 };
 
@@ -98,7 +109,7 @@ class Banking_Interface : public User_Authentication
                 exit;
             }
             else{
-                cout << "| ERROR! | No choice selected, or invalid input, type a number!\n";
+                cout << "| ERROR! | No choice selected, or invalid input, type a number!\n\n";
                 User_Action = 0;
                 Begin_Text();
             }
