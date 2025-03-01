@@ -54,15 +54,21 @@ class Account_Management
 
         // Create_Acc is used to create a new account, and list it within the system. (will output to txt file with persistant log by Phase 2)
         int Create_Acc(){
+            Clear_Acc_Info();
             bool Press_Enter = false;
-            cout << "Welcome to the Account Creation Menu, you will be asked various questions that are neccessary to complete an account. \nAt the end of this process, you will be provided with an account recovery key, which must be kept safe at all times, in case your account needs to be recovered.\nPlease press any key to continue.\n";
+            cout << "Welcome to the Account Creation Menu, you will be asked various questions that are neccessary to complete an account. \nAt the end of this process, you will be provided with an account recovery key, which must be kept safe at all times, in case your account needs to be recovered.\nPlease press 'Enter' to continue: ";
             while(Press_Enter == false){
                 if (GetAsyncKeyState(VK_RETURN) & 0x8000) {
-                    std::cout << "Enter key pressed!" << std::endl;
-                    // Small delay to avoid program error.
-                    Sleep(200);
+                    // Setting Press_Enter to true instantly ends the while loop.
+                    Press_Enter = true;
                 }
             }
+            //Begin gathering information to create the account/
+            cout << "\nPlease Enter your full name: ";
+            cin >> Acc_Name;
+            //TODO: Create error checks to ensure data types are the same as their inputs.
+            cout << "\nThank you, " << Acc_Name << ", Please enter your birth year (####): ";
+
         }
 };
 
