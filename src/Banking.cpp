@@ -1,16 +1,22 @@
-// Anthony Nagy - COMS-280-WWW02 - Final Project
+// Anthony Nagy | COMS-280-WWW02 | Final Project
 #include <iostream>
-#include <windows.h>
+#include <string>
+#include <typeinfo>
+#include <algorithm>
+
+//#include "Account_Balance.txt"
+//#include "Account_Info.txt"
 
 using namespace std;
 
-// Account Management | Primary Class that handles account information such as creating, deleting, managing, merging, and other operations.
 // Incode 'Acc' refers to 'Account'
+// Debug for Return Values are as follows: | return(0) = Program Exit | return(1) = Default Value(TBD) | return(2) = Success/Verified/Valid | return(3) = Invalid/Input-Error/General-Error | return(4,5,6,7) = Verification for Accounts/Recovery Process
+
+// Account Management | Primary Class that handles account information such as creating, deleting, managing, merging, and other operations.
 class Account_Management
 {
     private:
-        // Boolean 'Clear_Info' is used to ensure that account information is always returned to default states.
-        bool Clear_Info = true;
+        
 
     protected:
         // Account Creation Number | Used by the bank for internal use, to identify how many members are active at the bank, and to award the Xth customer for chosing this bank.
@@ -37,41 +43,141 @@ class Account_Management
         };
 
     public:
-        // Fucntion Clear_Acc_Info is used, with true boolean 'Clear_Info', to ensure that account information is always returned to default states.
-        void Clear_Acc_Info(){
-            if(Clear_Info == true){
-                Acc_Create_Num = 0;
-                Acc_Num = 1234567890;
-                Acc_Name = "JOHN DOE";  
-                Acc_Birthyear = 1234;
-                Acc_Balance = 0;
-                Acc_Rec_Key = 123456;
-                int E_Account_Info[4] = {Acc_Create_Num, Acc_Num, Acc_Birthyear, Acc_Rec_Key};
-            }
+        // Fucntion Clear_Acc_Info is used to ensure that account information is always returned to default states.
+        void Acc_Clear_Info(){
+            Acc_Create_Num = 0;
+            Acc_Num = 1234567890;
+            string Acc_Name = "JOHN DOE";  
+            Acc_Birthyear = 1234;
+            Acc_Balance = 0;
+            Acc_Rec_Key = 123456;
+            int E_Account_Info[4] = {Acc_Create_Num, Acc_Num, Acc_Birthyear, Acc_Rec_Key};
+            
         }
 
+        int Acc_Create_Step1(){
+            // Instructions
+            cout << "Welcome to the Account Creation Menu, you will be asked various questions that are neccessary to complete the creation of an account at this Bank. \nAt the end of this process, you will be provided with an account recovery key, which must be kept safe at all times, in case your account needs to be recovered.\nPlease press 'Enter' if you understand the instructions: ";
+            
+            // std::cin.ignore is used to clear the buffer from any possible newline(\n) characters that might interfear with the check that the 'Enter Key' is being pressed.
+            cin.ignore();
+            // Check to see if the Enter key (new line) is pressed, loop will only break if enter is pressed, or program is terminated.
+            if (cin.get() == '\n'){
+                // Setting Press_Enter to true instantly ends the while loop.
+                return(2);
+            }
 
+            return(1);
+        }
 
-        // Create_Acc is used to create a new account, and list it within the system. (will output to txt file with persistant log by Phase 2)
-        int Create_Acc(){
-            Clear_Acc_Info();
-            bool Press_Enter = false;
-            cout << "Welcome to the Account Creation Menu, you will be asked various questions that are neccessary to complete an account. \nAt the end of this process, you will be provided with an account recovery key, which must be kept safe at all times, in case your account needs to be recovered.\nPlease press 'Enter' to continue: ";
-            while(Press_Enter == false){
-                if (GetAsyncKeyState(VK_RETURN) & 0x8000) {
-                    // Setting Press_Enter to true instantly ends the while loop.
-                    Press_Enter = true;
+        int Acc_Create_Step2(){
+            // Variable Initialization
+            // Name_Space_Count | Used to count the number of spaces within the name provided.
+            int Name_Space_Count;
+            // Name_Length | Used to count the number of characters in a name.
+            int Name_Length;
+            // Alpha_Count | Used to count the number of alphabetical characters in a name.
+            int Alpha_Count;
+
+            //Second Verification that the specific step's data is reset to default value "JOHN DOE"
+            Acc_Name = "JOHN DOE";
+
+            //Begin gathering information to create the account/
+            cout << "\nPlease enter your full name (First and Last, A-Z): ";
+            getline(cin, Acc_Name);
+            //toupper(Acc_Name);
+            transform(Acc_Name.begin(), Acc_Name.end(), Acc_Name.begin(), ::toupper);
+
+            // Set Default values of variables.
+
+            Name_Space_Count = 0;
+            Name_Length = 0;
+            Alpha_Count = 0;
+
+            Name_Length = Acc_Name.length();
+            //cout << Name_Length;
+
+            // For loop used to identify each char within the name, counting space's, and detecting any characters not considered 'legal'.
+            for(int Char_Val : Acc_Name){
+                /*
+                // All characters of a name are set to uppercase values for Bank Use.
+                Char_Val = toupper(Char_Val);
+                */
+                //cout << Char_Val << " \n";
+                if(static_cast<int>(Char_Val) == 32){
+                    Name_Space_Count++;
+                    //Name_Length++;
+                }
+                // Check to determine if a specific char within the Acc_Name string has a value of A through Z, does nothing.
+                else if((static_cast<int>(Char_Val) >= 65) && (static_cast<int>(Char_Val) <= 90)){ Alpha_Count++; }
+                // Check to determine if a specific char within the Acc_Name string is the value of ' or `, does nothing.
+                else if((static_cast<int>(Char_Val) == 39) || (static_cast<int>(Char_Val) == 96)){ }
+                //if(((static_cast<int>(Char_Val) >= 97) && (static_cast<int>(Char_Val) <= 90))){ cout << "Program Error, toupper(char) failed."; }
+                
+                // Used the comment below to track the ASCII value of each char, giving me the specific value to target to and debug the error checks for the name string.
+                //cout << "\nYour name contains " << Name_Space << " Spaces.";
+                // If all other checks fail, the program returns an error, due to a specific char in the Acc_Name string not being considered a legal character.
+                else{
+                    cout << "Invalid Character detected! (Only A-Z, ' or `, and one space is allowed.)";
+                    return(3);
                 }
             }
-            //Begin gathering information to create the account/
-            cout << "\nPlease Enter your full name: ";
-            cin >> Acc_Name;
-            //TODO: Create error checks to ensure data types are the same as their inputs.
-            cout << "\nThank you, " << Acc_Name << ", Please enter your birth year (####): ";
+            if(Name_Length == 0){
+                cout << "\nEmpty, or Invalid Input! | Please enter your first and last name.";
+                return(3);
+            }
+            else if(!(Name_Space_Count == 1)){
+                cout << "Invalid Number of spaces within the name provided! Please make sure to give a first and last, with one space. (Eg. 'John Doe')";
+                return(3);
+            }
+            else if((Alpha_Count < 2) || (Alpha_Count > 60)){
+                cout << "Too few, or too many characters in name, please enter a name between 2 and 60 characters in length! (Only A-Z, ' or `, and one space is allowed.)";
+                return(3);
+            }
+            /*else{
+                cout << "Unknown Error!";
+                return(3);
+            }*/
 
+            return(1);
+        }
+
+        int Acc_Create_Step3(){
+            // Variable Initialization
+
+
+            //
+            cout << "\nThank you, " << Acc_Name << ", Please enter your birth year (####): ";
+            cin >> Acc_Birthyear;
+
+            return(1);
+        }
+
+        // Create_Acc is used to create a new account, and list it within the system. (will output to txt file with persistant log by Phase 2)
+        int Acc_Create(){
+            Acc_Clear_Info();
+
+            // Variable Initialization
+            int Step_Status = 0;
+
+            // Run Account Creation Steps, while determining the return values. Commented out cout's are used for debug.
+            while(!(Step_Status == 2)){
+                Step_Status = Acc_Create_Step1();
+                //cout << "\n" << Step_Status;
+            }
+            Step_Status = 0;
+            while(!(Step_Status == 1)){
+                Step_Status = Acc_Create_Step2();
+                //cout << "\n" << Step_Status;
+            }
+            Step_Status = 0;
+            while(!(Step_Status == 1)){
+                Step_Status = Acc_Create_Step3();
+                cout << "\n" << Step_Status;
+            }
+            return(1);
         }
 };
-
 
 // Transaction History | Secondary Class that manages the logging of transaction interactions within each account. This will be fully implemented in Phase2, with an input/output from a persistant external txt file.
 class Transaction_History : public Account_Management
@@ -85,39 +191,51 @@ class Transaction_History : public Account_Management
 // User Authentication | Validates Account Information, Authenticates Users into accounts, and Verifies Identity using recovery key and other methods.
 class User_Authentication : public Account_Management
 {
+    private:
+
+    public:
+    int Acc_Login(){
+        
+        return(1);
+    }
 
 };
 
+// This 'Banking_Interface' gives the options of Accessing an existing account, creating an entirely new account, or recovering an account from a key that is assigned to a profile.
 class Banking_Interface : public User_Authentication
 {
     private:
         int User_Action = 0;
     public:
-        // This 'Banking_Interface' gives the options of Accessing an existing account, creating an entirely new account, or recovering an account from a key that is assigned to a profile
-        void Begin_Text(){
-            cout << "Greetings Valued Customer! \n Please select an action from below.\n  1  | Access Account\n  2  | Create New Account\n  3  | Recover an Account (using Recovery Code)\n  4  | Exit\nInput your choice: ";
+        
+        void Interface_Start_Text(){
+            cout << "Greetings Valued Customer!\n\nPlease select an action from below.\n  1  | Access Account\n  2  | Create New Account\n  3  | Recover an Account (using Recovery Code)\n  4  | Exit\nInput your choice: ";
             cin >> User_Action;
             cout << "\n";
         }
-        void Begin_Interaction(){
-            Begin_Text();
+        void Interface_Start_Interact(){
+            // User Action 1 | Access Account
             if(User_Action == 1){
-                User_Authentication::Create_Acc();
+                User_Authentication::Acc_Login();
             }
+            // User Action 2 | Access Account
             else if(User_Action == 2){
-                
+                Account_Management::Acc_Create();
             }
+            // User Action 1 | Access Account
             else if(User_Action == 3){
                 //(Recovery)Create after accounts
             }
+            // User Action 1 | Access Account
             else if(User_Action == 4){
                 cout << "Thank you for using our services, valued customer, we look forward to your next visit!\n";
                 exit;
             }
+            // Error Handle | Restart Banking Interface 
             else{
-                cout << "| ERROR! | No choice selected, or invalid input, type a number!\n\n";
+                cout << "| ERROR! | No choice selected, or invalid input, type a number!\nResetting Console...\n\n";
                 User_Action = 0;
-                Begin_Text();
+                Interface_Start_Text();
             }
         }
 };
@@ -131,10 +249,11 @@ int main()
     Banking_Interface Interface;
 
     // Starting Processes
-    Acc_Manage.Clear_Acc_Info();
+    Acc_Manage.Acc_Clear_Info();
 
     // Begin Program by starting the inteface interaction function.
-    Interface.Begin_Interaction();
+    Interface.Interface_Start_Text();
+    Interface.Interface_Start_Interact();
 
     return 0;
 }
