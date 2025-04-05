@@ -3,6 +3,7 @@
 #include <string>
 #include <typeinfo>
 #include <algorithm>
+#include <chrono>
 
 //#include "Account_Balance.txt"
 //#include "Account_Info.txt"
@@ -11,6 +12,17 @@ using namespace std;
 
 // Incode 'Acc' refers to 'Account'
 // Debug for Return Values are as follows: | return(0) = Program Exit | return(1) = Default Value(TBD) | return(2) = Success/Verified/Valid | return(3) = Invalid/Input-Error/General-Error | return(4,5,6,7) = Verification for Accounts/Recovery Process
+
+/*class Time_Date_Management{
+    public:
+    //using namespace chrono;
+
+    //auto now = std::chrono::system_clock::now();
+    time
+
+    //floor<days>(chrono::system_clock::now()).year())
+
+};*/
 
 // Account Management | Primary Class that handles account information such as creating, deleting, managing, merging, and other operations.
 class Account_Management
@@ -34,13 +46,15 @@ class Account_Management
 
         // Interger Array for essential account information, or identifiers, using a fixed set of data. The array consists of 4 values, given the removal of unnessesary information, the customer name and balance, and adding an additional 'member number', assigned by the Bank for internal use.
         int E_Account_Info[4];
+
+        string User_Input;
         
         // Basic Account Info struct, used to combine multiple data types, to present general information to the user, about their account. (work in progress)
-        struct B_Account_Info{
+        /*struct B_Account_Info{
             int Num;
             string Name;
             double Balance; 
-        };
+        };*/
 
     public:
         // Fucntion Clear_Acc_Info is used to ensure that account information is always returned to default states.
@@ -143,12 +157,47 @@ class Account_Management
         }
 
         int Acc_Create_Step3(){
+            //using namespace chrono;
+
             // Variable Initialization
 
 
             //
             cout << "\nThank you, " << Acc_Name << ", Please enter your birth year (####): ";
-            cin >> Acc_Birthyear;
+            try{
+                getline(cin, User_Input);
+                try{Acc_Birthyear = stoi(User_Input);}
+                catch(const std::invalid_argument& Err_Code){
+                    cerr << "| Error | Invalid Argument!" << Err_Code.what() << "\n\n";
+                }
+                catch (const std::out_of_range& Err_Code){
+                    cerr << "| Error | Out of Range!" << Err_Code.what() << "\n\n";
+                }
+                catch(...){
+                    cerr << "| Unknown Error |";
+                }
+                if(typeid(Acc_Birthyear) != typeid(int)){
+                    throw(1);
+                }
+                // Will implement date checks for current year by Phase 4.
+                else if(Acc_Birthyear < 1900 || Acc_Birthyear > 2026){
+                    throw(2);
+                }
+            }
+            catch(int Err_Code){
+                if(Err_Code == 1){
+                    cerr << "| Error | Invalid data type";
+                }
+                else if(Err_Code == 2){
+                    cerr << "| Error | Birthyear out of realistic range.";
+                }
+                else{
+                    cerr << "| Undetermined Error Code |";
+                }
+            }
+            catch(...){
+                cerr << "| Unknown Error |";
+            }
 
             return(1);
         }
@@ -206,12 +255,59 @@ class Banking_Interface : public User_Authentication
 {
     private:
         int User_Action = 0;
-    public:
+        string User_Input;
         
+    public:
         void Interface_Start_Text(){
+            User_Input.clear();
             cout << "Greetings Valued Customer!\n\nPlease select an action from below.\n  1  | Access Account\n  2  | Create New Account\n  3  | Recover an Account (using Recovery Code)\n  4  | Exit\nInput your choice: ";
-            cin >> User_Action;
-            cout << "\n";
+            try{
+                if(getline(cin, User_Input)){
+                    try{User_Action = stoi(User_Input);}
+                    catch(const invalid_argument& Err_Code){
+                        cerr << "| Error | Invalid Argument!" << Err_Code.what() << "\n\n";
+                    }
+                    catch (const out_of_range& Err_Code){
+                        cerr << "| Error | Out of Range!" << Err_Code.what() << "\n\n";
+                    }
+                    catch(...){
+                        cerr << "| Unknown Error |";
+                    }
+                    if(typeid(User_Action) != typeid(int)){
+                        throw(1);
+                    }
+                    else if(User_Action < 1 || User_Action > 4){
+                        throw(2);
+                    }
+                }
+                else{
+                    throw(3);
+                }
+                //cin >> User_Action;
+                //cout << "001 | " << User_Input << "\n";
+                
+                //cout << "002 | " << User_Action;
+
+
+                // Will continue on if no errors are thrown.
+            }
+            catch(int Err_Code){
+                if(Err_Code == 1){
+                    cerr << "| ERROR! | Invalid Input Data Type, enter an Integer!\n\n";
+                }
+                else if(Err_Code == 2){
+                    cerr << "| ERROR! | Integer outside of Input Range, Enter a value 1-4!\n\n";
+                }
+                else if(Err_Code == 3){
+                    cerr << "| ERROR! | Failed to read input";
+                }
+                else{
+                    cerr << "| ERROR! | Undetermined Error Code";
+                }
+            }
+            catch(...){
+                cerr << "| ERROR! | Undefined Error\n";
+            }
         }
         void Interface_Start_Interact(){
             // User Action 1 | Access Account
@@ -237,7 +333,17 @@ class Banking_Interface : public User_Authentication
                 User_Action = 0;
                 Interface_Start_Text();
             }
+            
         }
+        /*catch(int Err_Code){
+            if(Err_Code == 1){
+                cout << "| ERROR! | No choice selected, or invalid input, type a number!\nResetting Console...\n\n";
+            }
+        }*/
+        /*catch(...){
+            cout << "Unknown Error\n";
+            Interface_Start_Text();
+        }*/
 };
 
 int main()
@@ -247,6 +353,7 @@ int main()
     Transaction_History Trans_Hist;
     User_Authentication User_Auth;
     Banking_Interface Interface;
+    //Time_Date_Management TD_Manage;
 
     // Starting Processes
     Acc_Manage.Acc_Clear_Info();
