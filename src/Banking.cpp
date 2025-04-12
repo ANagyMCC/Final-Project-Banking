@@ -105,7 +105,7 @@ class Utility_Functions
                     }
                     else{
                         Function_Status = 2;
-                        cerr << "| Error | Non-Integer value detected.";
+                        cerr << "| Error | Non-Integer value detected.\n";
                         return(5);
                         //throw(invalid_argument("Non-Integer value detected."));
                         
@@ -142,7 +142,7 @@ class Utility_Functions
             }
             catch(...){
                 Function_Status = 2;
-                cerr << "| Unknown Error - Inside 'Utility_Functions' |";
+                cerr << "| Unknown Error - Inside 'Utility_Functions' |\n";
                 return(5);
             }
         }
@@ -481,7 +481,7 @@ class Banking_Interface : public User_Authentication
                     }
                     else
                     { 
-                        cerr << "\n| Error | Caught Non-Int Value " << User_Input << ".\n";
+                        cerr << "| Error | Caught Non-Int Value " << User_Input << ".\n\n";
                         User_Action = 0;
                         cin.clear();
                         User_Input.clear();
@@ -580,6 +580,7 @@ class Banking_Interface : public User_Authentication
                 if(temp_Var == 3){
                     cout << "\nAccount Creation Successful, thank you, " << Acc_Name << ".";
                     //prepare for data output to txt file here (using external function)
+                    temp_Var = 0;
                     return(3);
                 }
                 else if(temp_Var == 2){
@@ -593,7 +594,7 @@ class Banking_Interface : public User_Authentication
             // User Action 1 | Access Account
             while(User_Action == 4){
                 cout << "Thank you for using our services, valued customer, we look forward to your next visit!\n";
-                exit;
+                return(3);
             }
             // Error Handle | Restart Banking Interface 
             if((User_Action != 1) && (User_Action != 2) && (User_Action != 3) && (User_Action != 4)){
