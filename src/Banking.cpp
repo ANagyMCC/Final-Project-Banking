@@ -1,14 +1,14 @@
 // Anthony Nagy | COMS-280-WWW02 | Final Project
 #include <iostream>
 #include <string>
-#include <typeinfo>
+//#include <typeinfo>
 #include <algorithm>
-//#include <time.h>
-#include <chrono>
+//#include <chrono>
 #include <sstream>
 #include <ctime>
 #include <format>
-#include <optional>
+#include <fstream>
+#include <random>
 
 //#include "Account_Balance.txt"
 //#include "Account_Info.txt"
@@ -17,17 +17,6 @@ using namespace std;
 
 // Incode 'Acc' refers to 'Account'
 // Debug for Return Values are as follows: | return(0) = Program Exit | return(1) = Default Value(TBD) | return(2) = Success/Verified/Valid | return(3) = Invalid/Input-Error/General-Error | return(4,5,6,7) = Verification for Accounts/Recovery Process
-
-/*class Time_Date_Management{
-    public:
-    //using namespace chrono;
-
-    //auto now = chrono::system_clock::now();
-    time
-
-    //floor<days>(chrono::system_clock::now()).year())
-
-};*/
 
 class Utility_Functions
 {
@@ -147,7 +136,23 @@ class Utility_Functions
             }
         }
 
+        string Generate_Recovery_Key(int Key_Length){
+            // Initialize Variables
+            string Recovery_Key = "";
+            random_device Random;
 
+            // Process
+            // A non-deterministic random number generator that uses the randomness inherent in the OS and hardware.
+            mt19937 Rand_Generator(Random());
+            // By creating a distribution object, a desired range of values can be set (0-9), this also provides the variable type of int to the compiler.
+            uniform_int_distribution<> Random_Range(0, 9);
+
+            // for loop is used to grab a randomized int value between the ranges of 0 and 9, and then append it to the Recovery_Key string using +=, for a specified number of iterations.
+            for(int i = 0; i < Key_Length; ++i){
+                Recovery_Key += to_string(Random_Range(Rand_Generator));
+            }
+            return(Recovery_Key);
+        }
 
 };
 
@@ -267,7 +272,7 @@ class Account_Management : public Utility_Functions
             }
             // Error Handling
             {
-            if(Name_Length == 0 || Name_Length == NULL){
+            if(Name_Length == 0){
                 cerr << "\nEmpty, or Invalid Input! | Please enter your first and last name.";
                 return(2);
             }
@@ -295,15 +300,14 @@ class Account_Management : public Utility_Functions
 
             // Context Statement
             cout << "\nPlease enter your birth year (####): ";
+
+            // std::cin.clear() and User_Input.clear() is used to clear the buffer from any possible newline(\n) characters that might interfere with the check that the 'Enter Key' is being pressed.
             cin.clear();
             User_Input.clear();
-
-            //try{
                 // User Input
-                // std::cin.clear() is used to clear the buffer from any possible newline(\n) characters that might interfere with the check that the 'Enter Key' is being pressed.
+                
                 if(getline(cin, User_Input)){
-
-                // Processing
+                    // Processing
                     if(Utility_Functions::is_Int(User_Input)){
                         Acc_Birthyear = Utility_Functions::Str_to_Int(User_Input);
                     }
@@ -311,12 +315,10 @@ class Account_Management : public Utility_Functions
                         cerr << "User Input is not an integer!";
                         return(3);
                     }
-                    //cout << "| 1 |" << User_Input; //USED FOR DEBUG
-                    //cout << "| 2 |" << Acc_Birthyear; //USED FOR DEBUG
-                    //if((Utility_Functions::is_Int(Acc_Birthyear))){ cout << "SUCESS1!"; } USED FOR DEBUG
+                    
                     if(Utility_Functions::Function_Status == 1){
                         //cout << "\nYear is an int!"; //USED FOR DEBUG
-                        cout << "\nThe current year is :" << Utility_Functions::Current_Year_int << "\n";
+                        cout << "\nThe current year is " << Utility_Functions::Current_Year_int << ".\n";
 
                         Acc_Birthage = ((Utility_Functions::Current_Year_int)-(Acc_Birthyear));
                         cout << Acc_Name << " is approximately " << Acc_Birthage << " years old.\n";
@@ -331,50 +333,25 @@ class Account_Management : public Utility_Functions
                         Function_Status = 0;
                         return(4);
                         //cout << "SUCCESS2!"; // USED FOR DEBUG
-                        //cout << "\nAge of user is " << Acc_Birthage << " years old.";
+                    }
+                    else if(Utility_Functions::Function_Status == 2){ return(3); }
+                    else{ return(3); }
 
-                    }
-                    else if(Utility_Functions::Function_Status == 2){
-                        return(3);
-                    }
-                    else{
-                        return(3);
-                    }
                 }
                 else{ return(3); }
-                
-            //}
-            /*catch(int Err_Code){
-                if(Err_Code == 1){
-                    cerr << "\n| Error | Invalid data type, does not identify as an integer!.";
-                }
-                else if(Err_Code == 2){
-                    cerr << "\n| Error | Birthyear out of realistic range.";
-                }
-                else if(Err_Code == 3){
-                    cerr << "\n| Error | Empty or invalid input!";
-                }
-                else if(Err_Code == 4){
-                    cerr << "\n| Unknown Error! |";
-                }
-                else{
-                    cerr << "\n| Undetermined Error Code |";
-                }
-            }
-            catch(...){
-                cerr << "\n| Unknown Error |";
-            }*/
-            /*if(Utility_Functions::Function_Status == 1){
-                cout << "\n| OUTPUT STATUS 1 |";
-            }
-            else if(Utility_Functions::Function_Status == 2){
-                cout << "\n| OUTPUT STATUS 2 |";
-            }
-            else if(Utility_Functions::Function_Status == 0){
-                cout << "\n| OUTPUT STATUS 0 |";
-            }*/
 
             return(0);
+        }
+        int Acc_Create_Step4(){
+            // Initialize Variables
+            string Random_Recovery_Key = "";
+            
+            // Process
+            // Random_Recovery_Key variable being set to the output of the randomly generated, 8 digit long key.
+            Random_Recovery_Key = Utility_Functions::Generate_Recovery_Key(8);
+            cout << "\nYour randomized account recovery key is: "<< Random_Recovery_Key << ". \nThis 'Recovery Key' is the backup key you will need to provide; if you lose the passcode you are about to enter, and need to reset it, or otherwise need recover the account.\n";
+
+            return(5);
         }
 
         // Create_Acc is used to create a new account, and list it within the system. (will output to txt file with persistant log by Phase 2)
@@ -385,29 +362,36 @@ class Account_Management : public Utility_Functions
             int Step_Status = 1;
 
             // Run Account Creation Steps, while determining the return values. Commented out cout's are used for debug.
+            // These Loops provide the ability for each step to not be interupted, from incorrect inputs, while allowing exception handling both ways.
             while((Step_Status == 1)){
+                // Acc_Create_Step1() is used to provide a disclaimer to ensure the user understands what they must enter. A successful and valid input will continue to the next step.
                 Step_Status = Acc_Create_Step1();
                 //cout << "\n" << Step_Status; //USED FOR DEBUG
                 
             }
-            //Step_Status = 0;
             while((Step_Status == 2)){
+                // Acc_Create_Step2() is used to gather the name of the customer that is to be used in the account creation process. A successful and valid input will continue to the next step.
                 Step_Status = Acc_Create_Step2();
                 //cout << "\n" << Step_Status; //USED FOR DEBUG
             }
-            //Step_Status = 0;
             while((Step_Status == 3)){
+                // Acc_Create_Step3() is used to gather the birth year of the customer that is to be used in the account creation process. A successful and valid input will continue to the next step.
                 Step_Status = Acc_Create_Step3();
                 //cout << "\n" << Step_Status; //USED FOR DEBUG
             }
-            if(Step_Status == 4){
+            while((Step_Status == 4)){
+                // Acc_Create_Step4() is used to generate and provide the user with a randomized recovery key for secure access to their account. A successful and valid input will continue to the next step.
+                Step_Status = Acc_Create_Step4();
+            }
+            
+            // Step Status 5 indicates that the account creation process is complete.
+            if(Step_Status == 5){
                 // Account Creation Complete
-                return(3);
+                return(1);
             }
             else if(Step_Status == 0){
                 cerr << "| Error Encountered | ";
                 Step_Status = 1;
-                return(2);
             }
             return(0);
         }
@@ -418,7 +402,7 @@ class Transaction_History : public Account_Management
 {
     // Retrieve Balance Function used to preform a retrieval of the specified account's balance, given the account number. At this point, the user has already validated who they are.
     double Retrieve_Balance(int Acc_Num){
-
+        return(0);
     }
 };
 
@@ -446,123 +430,34 @@ class Banking_Interface : public User_Authentication
     public:
         int User_Action = 0;
         int Interface_Start_Text(){
+            cout << "Greetings Valued Customer!\n\nPlease select an action from below.\n  1  | Access Account\n  2  | Create New Account\n  3  | Recover an Account (using Recovery Code)\n  4  | Exit\nInput your choice: ";
+            
+            // User Input
+            cin.clear();
             User_Input.clear();
 
-            cout << "Greetings Valued Customer!\n\nPlease select an action from below.\n  1  | Access Account\n  2  | Create New Account\n  3  | Recover an Account (using Recovery Code)\n  4  | Exit\nInput your choice: ";
-            //try{
-                // User Input
-                
-                cin.clear();
-                if(getline(cin, User_Input)){
+            // if statement used in input to provide error handling in the case that the Stream is unable to pull input, this should only ever happen in the case of excessive spam of characters for the input, overloading stream (possibly).
+            if(getline(cin, User_Input)){
 
-                    // Processing & Error Handling
-                    /*try{
-                        User_Action = Str_to_Int(User_Input);
-                        Utility_Functions::Function_Status = 0;
-                    }
-                    catch(int Err_Code){
-                        if(Err_Code == 0){ cerr << "\n| Outside Error 1 | Non-Typical"; }
-                        else if (Err_Code == 1){ cerr << "\n| Outside Error 2 | Non-Typical"; }
-                        else{ cerr << "\n| Unknown Outside Error | Non-Typical"; }
-                    }
-                    catch(const invalid_argument& Err_Code){
-                        cerr << "| Error | Invalid Argument!" << Err_Code.what() << "\n\n";
-                    }
-                    catch (const out_of_range& Err_Code){
-                        cerr << "| Error | Out of Range!" << Err_Code.what() << "\n\n";
-                    }
-                    catch(...){
-                        cerr << "| Unknown Error |";
-                    }*/
-                    if(Utility_Functions::is_Int(User_Input)){
-                        User_Action = Str_to_Int(User_Input);
-                        Utility_Functions::Function_Status = 0;
-                        return(2);
-                    }
-                    else
-                    { 
-                        cerr << "| Error | Caught Non-Int Value " << User_Input << ".\n\n";
-                        User_Action = 0;
-                        cin.clear();
-                        User_Input.clear();
-                    }
-                    
-                    //cout << User_Action; //USED FOR DEBUG
-                    //cerr << User_Action; //USED FOR DEBUG
-                    if(User_Action == 5){
-                        //cerr << "Failure"; //USED FOR DEBUG
-                        User_Action = 0;
-                        return(1);
-                    }
-                    
-                    else if(!(User_Action > 1 && User_Action < 4)){
-                        return(1);
-                    }
-                    
-                    /*else if(!(Utility_Functions::is_Int(User_Action))){ return; }
-                    else if(Utility_Functions::is_Int(User_Action)){
-                        //cout << "\nCORRECT!!"; USED FOR DEBUG
-                        // Function executed properly;
-                        return;
-                    }
-                    else{ cout << "NOPE!"; }*/
-                
+                // Processing & Error Handling
+                // Calling the is_Int 'Utility' Function to provide error handling for the user input, unless the Input is successful, it will restart the entire Interface_Start_Text() function.
+                if(Utility_Functions::is_Int(User_Input)){
+                    User_Action = Str_to_Int(User_Input);
+                    Utility_Functions::Function_Status = 0;
+                    return(2);
                 }
-                else{ 
-                    cerr << "Interface Failed";
-                    return(1); 
-                }
-                /*if(getline(cin, User_Input)){
-                    try{User_Action = stoi(User_Input);}
-                    catch(int Err_Code){
-                        if(Err_Code == 0){ cerr << "\n| Outside Error 1 | Non-Typical"; }
-                        else if (Err_Code == 0){ cerr << "\n| Outside Error 2 | Non-Typical"; }
-                        else{ cerr << "\n| Unknown Outside Error | Non-Typical"; }
-                    }
-                    catch(const invalid_argument& Err_Code){
-                        cerr << "| Error | Invalid Argument!" << Err_Code.what() << "\n\n";
-                    }
-                    catch (const out_of_range& Err_Code){
-                        cerr << "| Error | Out of Range!" << Err_Code.what() << "\n\n";
-                    }
-                    catch(...){
-                        cerr << "| Unknown Error |";
-                    }
-                    if(typeid(User_Action) != typeid(int)){
-                        throw(1);
-                    }
-                    else if(User_Action < 1 || User_Action > 4){
-                        throw(2);
-                    }
-                }
-                else{
-                    throw(3);
-                }*/
-                //cin >> User_Action;
-                //cout << "001 | " << User_Input << "\n"; //USED FOR DEBUG
-                
-                //cout << "002 | " << User_Action; //USED FOR DEBUG
-
-
-                // Will continue on if no errors are thrown.
-            //}
-            /*catch(int Err_Code){
-                if(Err_Code == 1){
-                    cout << "| ERROR! | Invalid Input Data Type, enter an Integer!\n\n";
-                }
-                else if(Err_Code == 2){
-                    cout << "| ERROR! | Integer outside of Input Range, Enter a value 1-4!\n\n";
-                }
-                else if(Err_Code == 3){
-                    cout << "| ERROR! | Failed to retrieve input";
-                }
-                else{
-                    cout << "| ERROR! | Undetermined Error Code";
+                else
+                { 
+                    cerr << "| ERROR! | No choice selected, or invalid input, '" << User_Input << "'. \nType a number, between 1 and 4!\nResetting Banking Interface...\n\n";
+                    User_Action = 0;
+                    cin.clear();
+                    User_Input.clear();
                 }
             }
-            catch(...){
-                cout << "| ERROR! | Undefined Error\n";
-            }*/
+            else{ 
+                cerr << "Interface Failed";
+                return(1); 
+            }
             return(1);
         }
         int Interface_Start_Interact(){
@@ -577,14 +472,11 @@ class Banking_Interface : public User_Authentication
             // User Action 2 | Access Account
             while(User_Action == 2){
                 temp_Var = Account_Management::Acc_Create();
-                if(temp_Var == 3){
+                if(temp_Var == 1){
                     cout << "\nAccount Creation Successful, thank you, " << Acc_Name << ".";
                     //prepare for data output to txt file here (using external function)
                     temp_Var = 0;
                     return(3);
-                }
-                else if(temp_Var == 2){
-
                 }
             }
             // User Action 1 | Access Account
@@ -596,11 +488,13 @@ class Banking_Interface : public User_Authentication
                 cout << "Thank you for using our services, valued customer, we look forward to your next visit!\n";
                 return(3);
             }
-            // Error Handle | Restart Banking Interface 
-            if((User_Action != 1) && (User_Action != 2) && (User_Action != 3) && (User_Action != 4)){
-                cerr << "| ERROR! | No choice selected, or invalid input, type a number!\nResetting Console...\n\n";
+            // Error Handle for Input Value being out of desired range. | Restart Banking Interface 
+            if(!(User_Action > 1 && User_Action < 4)){
+                cin.clear();
+                User_Input.clear();
+                cerr << "Value outside of avaliable options, you entered: '" << User_Action << "'. Please select a number between 1 and 4!\n\n";
                 User_Action = 0;
-                Interface_Start_Text();
+                return(1);
             }
             return(2);
         }
@@ -624,6 +518,14 @@ int main()
     Banking_Interface Interface;
     Utility_Functions Util_Func;
     
+    /*
+    Program Status Indications (used to allow for further control over how the program operates.)
+    Program_Status = 0 | --- | Default Execution/Null Execution
+    Program_Status = 1 | CR1 | Start/Loop Program Section 1, until value is returned of '2' to continue to next section within program.
+    Program_Status = 2 | CR2 | Start/Loop Program Section 2, until value is returned of '3' to continue to next section within program.
+    Program_Status = 3 | CR3 | Start Program Section 3, until value is returned of '4' to continue to next section within program.
+    Program_Status = 4 | END | Indication to end the program.
+    */
     int Program_Status = 1;
 
     // Starting Processes
@@ -641,7 +543,11 @@ int main()
             Program_Status = Interface.Interface_Start_Interact();
             Interface.User_Action = 0;
         }
-        if(Program_Status == 3){
+        while(Program_Status == 3){
+            // temp output of 4 to continue to normal process (WIP).
+            Program_Status = 4;
+        }
+        if(Program_Status == 4){
             cout << "\n| Program End |"; 
             return(1);
         }
