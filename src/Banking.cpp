@@ -151,6 +151,11 @@ class Utility_Functions
             for(int i = 0; i < Key_Length; ++i){
                 Recovery_Key += to_string(Random_Range(Rand_Generator));
             }
+
+            // Uninitialize possible memory intensive operations.
+            ~Rand_Generator();
+
+            // Return Complete Recovery_Key.
             return(Recovery_Key);
         }
 
@@ -354,6 +359,40 @@ class Account_Management : public Utility_Functions
             return(5);
         }
 
+        int Acc_Create_Step5(){
+            //Initizlize Variables
+            int Acc_PIN = 0;
+            string User_Input = "";
+
+            // User Input
+            cout << "\nPlease input a four digit PIN (Personal Identification Number), you will need to remember this for preforming transactions, or general access to your account. \nEnter the four (4) digit code now: ";
+            cin.clear();
+            User_Input.clear();
+            if(getline(cin, User_Input)){
+                // Processing & Error Handling
+                // Calling the is_Int 'Utility' Function to provide error handling for the user input, unless the Input is successful, the Acc_Create_Step5() function will restart with cleared values.
+                if(Utility_Functions::is_Int(User_Input)){
+                    Acc_PIN = Str_to_Int(User_Input);
+                    Utility_Functions::Function_Status = 0;
+                    return(6);
+                }
+                else
+                { 
+                    cerr << "\n| ERROR! | No choice selected, or invalid input: '" << User_Input << "'. \nType a set of four numbers, each of them being between between 0 and 9! (Ex. '1234')\nResetting PIN Input...\n";
+                    Acc_PIN = 0;
+                    cin.clear();
+                    User_Input.clear();
+                }
+            }
+            else{ 
+                cerr << "\n| Unknown Input Error within getline() function |";
+                cin.clear();
+                User_Input.clear(); 
+            }
+
+            return(5);
+        }
+
         // Create_Acc is used to create a new account, and list it within the system. (will output to txt file with persistant log by Phase 2)
         int Acc_Create(){
             Acc_Clear_Info();
@@ -383,9 +422,13 @@ class Account_Management : public Utility_Functions
                 // Acc_Create_Step4() is used to generate and provide the user with a randomized recovery key for secure access to their account. A successful and valid input will continue to the next step.
                 Step_Status = Acc_Create_Step4();
             }
+            while((Step_Status == 5)){
+                // Acc_Create_Step5() is used to gather a PIN number from the user for their regular use on the account. A successful and valid input will continue to the next step.
+                Step_Status = Acc_Create_Step5();
+            }
             
-            // Step Status 5 indicates that the account creation process is complete.
-            if(Step_Status == 5){
+            // Step Status 6 indicates that the account creation process is complete.
+            if(Step_Status == 6){
                 // Account Creation Complete
                 return(1);
             }
