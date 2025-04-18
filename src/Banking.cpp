@@ -12,6 +12,7 @@
 #include <random>
 #include <vector>
 #include <optional>
+#include <cctype>
 
 //#include "Account_Balance.txt"
 //#include "Account_Info.txt"
@@ -24,272 +25,276 @@ using namespace std;
 class Database_Management
 {
     private:
-    const string    Account_Info_file = "Account_Info.txt";
-    const string    Account_Trans_file = "Account_Transactions.txt";
+        const string    Account_Info_file = "Account_Info.txt";
+        const string    Account_Trans_file = "Account_Transactions.txt";
     
 
     protected:
-    int Account_Count(){
-        string              Data_line;
-        string              Data_segment;
-        string              Acc_Data_Field = "Acc_Create_Num";
-        int                 Line_Count;
-        optional<string>    current_Acc_Data;
-        // Vector used to contain a single account worth of data.
-        vector<string>      Acc_Data;
-        // ifstream Input_File creates a stream object, and attempts to open "Account_Info.txt"
-        ifstream            Input_File(Account_Info_file);
+        int Account_Count(){
+            string              Data_line;
+            string              Data_segment;
+            string              Acc_Data_Field = "Acc_Create_Num";
+            int                 Line_Count;
+            optional<string>    current_Acc_Data;
+            // Vector used to contain a single account worth of data.
+            vector<string>      Acc_Data;
+            // ifstream Input_File creates a stream object, and attempts to open "Account_Info.txt"
+            ifstream            Input_File(Account_Info_file);
 
-        Line_Count = 0;
-        if(Input_File.is_open()){
-            while(getline(Input_File, Data_line)){
+            Line_Count = 0;
+            if(Input_File.is_open()){
+                while(getline(Input_File, Data_line)){
 
-                Line_Count++;
-            }
-            Input_File.close();
-        }
-        else{ 
-            cerr << "\n| ERROR | Unable to open 'Account_Info.txt'.";
-        }
-        return(Line_Count);
-    }
-
-    // View Account Info is used to gather specific data from the Account_Info Database, and return a specific number and type of outputs.
-    optional<vector<string>> View_Account_Info(int target_Vector_Field, string target_Data_Value){
-        // Variable Initialization
-        string              Data_line;
-        string              Data_segment;
-        string              Acc_Data_Field;
-        string              Acc_Data_Value = "";
-        // Value_Target variable used to control the flow of the function, given a specific type and length of the target_Data_Value.
-        int                 Value_Target;
-        // Function_Status is used to control which values are removed, used in conjunction with Data_Restriction.
-        int                 Function_Status = 0;
-        // Data Restriciton Variable controls what data is returned within the vector, changing to 2-3 different values to represent Basic Info(0), Protected Info(1), and Processing Info(2)
-        int                 Data_Restriction = 0;
-
-
-        optional<string>    current_Acc_Data;
-        // Vector used to contain multiple different accounts worth of data.
-        //vector<vector<string>> m_Acc_Data;
-        // Vector used to contain a single account worth of data.
-        vector<string>      Acc_Data;
-        vector<string>      Acc_Data_final;
-        // ifstream Input_File creates a stream object, and attempts to open "Account_Info.txt"
-        ifstream            Input_File(Account_Info_file);
-
-        // Length check of second parameter, to provide multi-usability of the function.
-        Value_Target = target_Data_Value.length();
-        cout << "\nValue_Target (Length): " << Value_Target << "\n";
-        if(Value_Target == 1){
-            // Single value within Data Value likely executing a command that counts the amount of a specific data field.
-            Acc_Data_Value = "1 CHAR";
-        }
-        else if(Value_Target == 4){
-            // Value length of 4 is equal to Birthyear or PIN_Num.
-            Acc_Data_Value = "4 CHAR";
-        }
-        else if(Value_Target == 8){
-            // Value length of 8 is equal to a Recovery Key get process.
-            Acc_Data_Value = "8 CHAR";
-        }
-        else if(Value_Target == 10){
-            // Value length of 10 is equal to an Account Number.
-            Acc_Data_Value = "10 CHAR";
-        }
-        else{
-            cerr << "\n| ERROR | Data Value out of range of possible parameters.\n";
-        }
-        cout << "\n Acc_Data_Value = " << Acc_Data_Value << "\n Value Target = " << Value_Target << "\n";
-
-        // Identifiers used to convert the short-hand target field to the string identifiers that is used within the txt document, used to specify actions for a desired vector/data field.
-        if(target_Vector_Field == 1){
-            Acc_Data_Field = "Acc_Create_Num";
-            // If statement used to describe the behavior of the function, given a specfic target_Data_value.
-            if(Acc_Data_Value == "1 CHAR"){
-                // target_Data_Value being 0 within the parameters of the function, with the Acc_Create_Num Field being selected, will retrieve the number of accounts within the list(used for awarding the n'th customer).
-                //Acc_Data_Value = "Acc_Create_Num";
-                //Function_Status = 1;
-                //MOVED TO SEPERATE FUNCTION
-            }
-            else { cerr << "\nFailed Execution of getting count of accounts.\n"; }
-        }
-        else if(target_Vector_Field == 2){
-            Acc_Data_Field = "Acc_Num";
-            //Function_Status = 2;
-            // If statement used to describe the behavior of the function, given a specfic target_Data_value.
-            //if((processed_Data_Value >= (Acc_Num_Min_Value)) && (processed_Data_Value <= (Acc_Num_Max_Value))){
-                // target_Data_Value being equal to a possibly valid account number, will check all lines of data within the database file, to check for an account matching the input value (Used for making sure duplicates don't exist).
-            //}
-            //else{ cerr << "| ERROR | Account out of range"; }
-            if(Acc_Data_Value == "10 CHAR"){
-                Acc_Data_Value = "Acc_Num";
-            }
-            else{ cerr << "\n| ERROR | Account number parameter not valid.\n"; }
-        }
-        else if(target_Vector_Field == 3){
-            Acc_Data_Field = "Acc_Name";
-            //Function_Status = 3;
-            // No current Use
-        }
-        else if(target_Vector_Field == 4){
-            Acc_Data_Field = "Acc_Birthyear";
-            // No current Use
-        }
-        else if(target_Vector_Field == 5){
-            // RECOVERY KEY, Only for use with Account recovery methods. On is output to compare customer given value to value within database.
-            Acc_Data_Field = "Acc_Rec_Key";
-            // If statement used to describe the behavior of the function, given a specfic target_Data_value.
-            //if((processed_Data_Value >= (Rec_Key_Min_Value)) && (processed_Data_Value <= (Rec_Key_Max_Value))){
-                // target_Data_Value being equal to a possibly valid Account Recovery Key, will check all lines of data within the database file, to check for an account matching the recovery key, will result in the output of a vector containing only the Recovery_Key and Acc_Num.
-
-            //}
-            if(Acc_Data_Value == "8 CHAR"){
-                Data_Restriction = 1;
-            }
-            else{ cerr << "\n| ERROR | Account out of range\n"; }
-            
-
-        }
-        else if(target_Vector_Field == 6){
-            // Only output data if checking that a specific account numbers' pin number is equal to that of what is in the database.
-            // Acc_Data_Field = "Acc_PIN_Num";
-            // If statement used to describe the behavior of the function, given a specfic target_Data_value.
-            //if(processed_Data_Value == 0){
-
-            //}
-            //else{ cerr << "\nPIN Numbers cannot be viewed after becoming the active PIN for an account. If your account needs to be recovered, pick that option within the login menu.\n"; }
-            if(Acc_Data_Value == "4 CHAR"){
-                //Acc_Data_Value = "Acc_PIN_Num";
-            }
-            else{ cerr << "\n| ERROR | Gathering of PIN not Sucessful.\n"; }
-        }
-        else if(target_Vector_Field == 0){
-            // All basic values will be displayed within the output variable
-            // If statement used to describe the behavior of the function, given a specfic target_Data_value.
-            //if((processed_Data_Value >= (Acc_Num_Min_Value)) && (processed_Data_Value <= (Acc_Num_Max_Value))){
-                // target_Data_value being equal to a valid account number within the database will result in the output of the general information of an account.
-
-            //}
-            if(Acc_Data_Value == "10 CHAR"){
-                // Account Lookup method used with an account number to output general info.
-                Acc_Data_Field = "Acc_Num";
-                Data_Restriction = 0;
-                cout << "\nTARGET SUCCESS";
-            }
-            else{ cerr << "\nNo valid input for General Account lookup.\n"; }
-        }
-        else{
-            //cerr << "\n| ERROR | Invalid Target Data Field, or out of valid range: \n" << target_Vector_Field << ".\n"; // USED FOR DEBUG
-            // Do nothing, Line does not contain target data, continue.
-        }
-
-        if(Input_File.is_open()){
-            while(getline(Input_File, Data_line)){
-                // Process of data within a string stream
-                stringstream Str_Stream(Data_line);
-                Acc_Data.clear();
-                while(getline(Str_Stream, Data_segment, ',')){
-                    // Trims the container blocks (,) used to seperate the data of the accounts. Output is more suitable for processing within code.
-                    Data_segment.erase(0, Data_segment.find_first_not_of(" "));
-                    Data_segment.erase((Data_segment.find_last_not_of(" ") + 1));
-                    // Trims the container blocks ([ and ]) used to hold data of the account, 
-                    if((Data_segment.front() == '[') && (Data_segment.back() == ']')){
-                        Data_segment = Data_segment.substr(1, (Data_segment.length() - 2));
-                        Acc_Data.push_back(Data_segment);
-                    }
-                    else{
-                    // Append 
-                    //cout << "Append1"; // USED FOR DEBUG
-                    Acc_Data.push_back(Data_segment);
-                    }
+                    Line_Count++;
                 }
-                for(size_t i = 0; i < Acc_Data.size(); ++ i){
-                    cout << "FOR LOOP" << i << "\n"; // USED FOR DEBUG
-                    if((Acc_Data[i]) == Acc_Data_Field){
-                        if(i + 1 < Acc_Data.size()){
-                            cout << "\nEnter1"; // USED FOR DEBUG
-                            current_Acc_Data = Acc_Data[(i + 1)];
-                            if (current_Acc_Data.has_value() && (current_Acc_Data.value() == target_Data_Value)){ 
-                                cout << "\nEnter2;"; // USED FOR DEBUG
-                                
-                                if(Data_Restriction == 0){
-                                    // Acc_Data_final will only include the data fields perscribed by the data restriction status. (Basic Info) [includes Acc_Num, Acc_Name, Acc_Birthyear, and Acc_Num]
-                                    cout << "\nRestriction 1 Detected";
-                                    Acc_Data_final.resize(6);
-                                    Acc_Data_final[0] = (Acc_Data[2]);
-                                    Acc_Data_final[1] = (Acc_Data[3]);
-                                    Acc_Data_final[2] = (Acc_Data[4]);
-                                    Acc_Data_final[3] = (Acc_Data[5]);
-                                    Acc_Data_final[4] = (Acc_Data[6]);
-                                    Acc_Data_final[5] = (Acc_Data[7]);
-                                    return(Acc_Data_final);
+                Input_File.close();
+            }
+            else{ 
+                cerr << "\n| ERROR | Unable to open 'Account_Info.txt'.";
+            }
+            return(Line_Count);
+        }
+
+        // View Account Info is used to gather specific data from the Account_Info Database, and return a specific number and type of outputs.
+        vector<string> View_Account_Info(int target_Vector_Field, string target_Data_Value){
+            // Variable Initialization
+            string              Data_line;
+            string              Data_segment;
+            string              Acc_Data_Field;
+            string              Acc_Data_Value = "";
+            // Value_Target variable used to control the flow of the function, given a specific type and length of the target_Data_Value.
+            int                 Value_Target;
+            // Function_Status is used to control which values are removed, used in conjunction with Data_Restriction.
+            int                 Function_Status = 0;
+            // Data Restriciton Variable controls what data is returned within the vector, changing to 2-3 different values to represent Basic Info(0), Protected Info(1), and Processing Info(2)
+            int                 Data_Restriction = 0;
+
+
+            optional<string>    current_Acc_Data;
+            // Vector used to contain multiple different accounts worth of data.
+            //vector<vector<string>> m_Acc_Data;
+            // Vector used to contain a single account worth of data.
+            vector<string>      Acc_Data;
+            vector<string>      Acc_Data_final;
+            // ifstream Input_File creates a stream object, and attempts to open "Account_Info.txt"
+            ifstream            Input_File(Account_Info_file);
+
+            // Length check of second parameter, to provide multi-usability of the function.
+            Value_Target = target_Data_Value.length();
+            //cout << "\nValue_Target (Length): " << Value_Target << "\n"; // USED FOR DEBUG
+            if(Value_Target == 1){
+                // Single value within Data Value likely executing a command that counts the amount of a specific data field.
+                Acc_Data_Value = "1 CHAR";
+            }
+            else if(Value_Target == 4){
+                // Value length of 4 is equal to Birthyear or PIN_Num.
+                Acc_Data_Value = "4 CHAR";
+            }
+            else if(Value_Target == 8){
+                // Value length of 8 is equal to a Recovery Key get process.
+                Acc_Data_Value = "8 CHAR";
+            }
+            else if(Value_Target == 10){
+                // Value length of 10 is equal to an Account Number.
+                Acc_Data_Value = "10 CHAR";
+                //cout << "\n10 CHAR!\n";  // USED FOR DEBUG
+            }
+            else{
+                cerr << "\n| ERROR | Data Value out of range of possible parameters.\n";
+            }
+            //cout << "\n Acc_Data_Value = " << Acc_Data_Value << "\n Value Target = " << Value_Target << "\n"; // USED FOR DEBUG
+
+            // Identifiers used to convert the short-hand target field to the string identifiers that is used within the txt document, used to specify actions for a desired vector/data field.
+            if(target_Vector_Field == 1){
+                Acc_Data_Field = "Acc_Create_Num";
+                // If statement used to describe the behavior of the function, given a specfic target_Data_value.
+                if(Acc_Data_Value == "1 CHAR"){
+                    // target_Data_Value being 0 within the parameters of the function, with the Acc_Create_Num Field being selected, will retrieve the number of accounts within the list(used for awarding the n'th customer).
+                    //Acc_Data_Value = "Acc_Create_Num";
+                    //Function_Status = 1;
+                    //MOVED TO SEPERATE FUNCTION
+                }
+                else { cerr << "\nFailed Execution of getting count of accounts.\n"; }
+            }
+            else if(target_Vector_Field == 2){
+                Acc_Data_Field = "Acc_Num";
+                //Function_Status = 2;
+                // If statement used to describe the behavior of the function, given a specfic target_Data_value.
+                //if((processed_Data_Value >= (Acc_Num_Min_Value)) && (processed_Data_Value <= (Acc_Num_Max_Value))){
+                    // target_Data_Value being equal to a possibly valid account number, will check all lines of data within the database file, to check for an account matching the input value (Used for making sure duplicates don't exist).
+                //}
+                //else{ cerr << "| ERROR | Account out of range"; }
+                if(Acc_Data_Value == "10 CHAR"){
+                    Acc_Data_Value = "Acc_Num";
+                }
+                else{ cerr << "\n| ERROR | Account number parameter not valid.\n"; }
+            }
+            else if(target_Vector_Field == 3){
+                Acc_Data_Field = "Acc_Name";
+                //Function_Status = 3;
+                // No current Use
+            }
+            else if(target_Vector_Field == 4){
+                Acc_Data_Field = "Acc_Birthyear";
+                // No current Use
+            }
+            else if(target_Vector_Field == 5){
+                // RECOVERY KEY, Only for use with Account recovery methods. On is output to compare customer given value to value within database.
+                Acc_Data_Field = "Acc_Rec_Key";
+                // If statement used to describe the behavior of the function, given a specfic target_Data_value.
+                //if((processed_Data_Value >= (Rec_Key_Min_Value)) && (processed_Data_Value <= (Rec_Key_Max_Value))){
+                    // target_Data_Value being equal to a possibly valid Account Recovery Key, will check all lines of data within the database file, to check for an account matching the recovery key, will result in the output of a vector containing only the Recovery_Key and Acc_Num.
+
+                //}
+                if(Acc_Data_Value == "8 CHAR"){
+                    Data_Restriction = 1;
+                }
+                else{ cerr << "\n| ERROR | Account out of range\n"; }
+                
+
+            }
+            else if(target_Vector_Field == 6){
+                
+                // Only output data if checking that a specific account numbers' pin number is equal to that of what is in the database.
+                // Acc_Data_Field = "Acc_PIN_Num";
+                // If statement used to describe the behavior of the function, given a specfic target_Data_value.
+                //if(processed_Data_Value == 0){
+
+                //}
+                //else{ cerr << "\nPIN Numbers cannot be viewed after becoming the active PIN for an account. If your account needs to be recovered, pick that option within the login menu.\n"; }
+                if(Acc_Data_Value == "10 CHAR"){
+                    Acc_Data_Field = "Acc_Num";
+                    Data_Restriction = 2;
+                    //cout << "Restriction Set to 2";  // USED FOR DEBUG
+                }
+                else{ cerr << "\n| ERROR | Gathering of PIN not Successful.\n"; }
+            }
+            else if(target_Vector_Field == 0){
+                // All basic values will be displayed within the output variable
+                // If statement used to describe the behavior of the function, given a specfic target_Data_value.
+                //if((processed_Data_Value >= (Acc_Num_Min_Value)) && (processed_Data_Value <= (Acc_Num_Max_Value))){
+                    // target_Data_value being equal to a valid account number within the database will result in the output of the general information of an account.
+
+                //}
+                if(Acc_Data_Value == "10 CHAR"){
+                    // Account Lookup method used with an account number to output general info.
+                    Acc_Data_Field = "Acc_Num";
+                    Data_Restriction = 0;
+                    cout << "\nTARGET SUCCESS";
+                }
+                else{ cerr << "\nNo valid input for General Account lookup.\n"; }
+            }
+            else{
+                //cerr << "\n| ERROR | Invalid Target Data Field, or out of valid range: \n" << target_Vector_Field << ".\n"; // USED FOR DEBUG
+                // Do nothing, Line does not contain target data, continue.
+            }
+
+            if(Input_File.is_open()){
+                while(getline(Input_File, Data_line)){
+                    // Process of data within a string stream
+                    stringstream Str_Stream(Data_line);
+                    Acc_Data.clear();
+                    while(getline(Str_Stream, Data_segment, ',')){
+                        // Trims the container blocks (,) used to seperate the data of the accounts. Output is more suitable for processing within code.
+                        Data_segment.erase(0, Data_segment.find_first_not_of(" "));
+                        Data_segment.erase((Data_segment.find_last_not_of(" ") + 1));
+                        // Trims the container blocks ([ and ]) used to hold data of the account, 
+                        if((Data_segment.front() == '[') && (Data_segment.back() == ']')){
+                            Data_segment = Data_segment.substr(1, (Data_segment.length() - 2));
+                            Acc_Data.push_back(Data_segment);
+                        }
+                        else{
+                        // Append 
+                        //cout << "Append1"; // USED FOR DEBUG
+                        Acc_Data.push_back(Data_segment);
+                        }
+                    }
+                    for(size_t i = 0; i < Acc_Data.size(); ++ i){
+                        //cout << "FOR LOOP" << i << "\n"; // USED FOR DEBUG
+                        if((Acc_Data[i]) == Acc_Data_Field){
+                            if(i + 1 < Acc_Data.size()){
+                                //cout << "\nEnter1"; // USED FOR DEBUG
+                                current_Acc_Data = Acc_Data[(i + 1)];
+                                if (current_Acc_Data.has_value() && (current_Acc_Data.value() == target_Data_Value)){ 
+                                    //cout << "\nEnter2;"; // USED FOR DEBUG
+                                    
+                                    if(Data_Restriction == 0){
+                                        // Acc_Data_final will only include the data fields perscribed by the data restriction status. (Basic Info) [includes Acc_Num, Acc_Name, Acc_Birthyear, and Acc_Num]
+                                        //cout << "\nRestriction 1 Detected"; // USED FOR DEBUG
+                                        Acc_Data_final.resize(6);
+                                        Acc_Data_final[0] = (Acc_Data[2]);
+                                        Acc_Data_final[1] = (Acc_Data[3]);
+                                        Acc_Data_final[2] = (Acc_Data[4]);
+                                        Acc_Data_final[3] = (Acc_Data[5]);
+                                        Acc_Data_final[4] = (Acc_Data[6]);
+                                        Acc_Data_final[5] = (Acc_Data[7]);
+                                        return(Acc_Data_final);
+                                    }
+                                    else if(Data_Restriction == 1){
+                                        //cout << "\nRestriction 2 Detected"; // USED FOR DEBUG
+                                        //string temp_var;
+                                        // Acc_Data_final will only include the data fields perscribed by the data restriction status. (Protected Info) [includes Acc_Num and Acc_Rec_Key]
+                                        //temp_var = ((Acc_Data[2]) + (Acc_Data[3]) + );
+                                        Acc_Data_final.resize(4);
+                                        Acc_Data_final[0] = (Acc_Data[2]);
+                                        Acc_Data_final[1] = (Acc_Data[3]);
+                                        Acc_Data_final[2] = (Acc_Data[8]);
+                                        Acc_Data_final[3] = (Acc_Data[9]);
+                                        return(Acc_Data_final);
+                                    }
+                                    else if(Data_Restriction == 2){
+                                        //cout << "\nRestriction 2 Output Attempted"; // USED FOR DEBUG
+                                        // Acc_Data_final will only include the data fields perscribed by the data restriction status. (Processing Info) [includes Acc_Num and Acc_PIN_Num]
+                                        Acc_Data_final.resize(4);
+                                        Acc_Data_final[0] = (Acc_Data[2]);
+                                        Acc_Data_final[1] = (Acc_Data[3]);
+                                        Acc_Data_final[2] = (Acc_Data[10]);
+                                        Acc_Data_final[3] = (Acc_Data[11]);
+                                        return(Acc_Data_final);
+                                    }
+                                    Input_File.close(); 
                                 }
-                                else if(Data_Restriction == 1){
-                                    cout << "\nRestriction 2 Detected";
-                                    //string temp_var;
-                                    // Acc_Data_final will only include the data fields perscribed by the data restriction status. (Protected Info) [includes Acc_Num and Acc_Rec_Key]
-                                    //temp_var = ((Acc_Data[2]) + (Acc_Data[3]) + );
-                                    Acc_Data_final.resize(4);
-                                    Acc_Data_final[0] = (Acc_Data[2]);
-                                    Acc_Data_final[1] = (Acc_Data[3]);
-                                    Acc_Data_final[2] = (Acc_Data[8]);
-                                    Acc_Data_final[3] = (Acc_Data[9]);
-                                    return(Acc_Data_final);
+                                else{
+                                    // Do nothing, as this data does not contain the desired value.
+                                    //cerr << "\nValue not found within line.\n"; // USED FOR DEBUG
                                 }
-                                else if(Data_Restriction == 2){
-                                    cout << "\nRestriction 3 Detected";
-                                    // Acc_Data_final will only include the data fields perscribed by the data restriction status. (Processing Info) [includes Acc_Create_Num and Acc_Num]
-                                    Acc_Data_final.resize(4);
-                                    Acc_Data_final[0] = (Acc_Data[0]);
-                                    Acc_Data_final[1] = (Acc_Data[1]);
-                                    Acc_Data_final[2] = (Acc_Data[2]);
-                                    Acc_Data_final[3] = (Acc_Data[3]);
-                                    return(Acc_Data_final);
-                                }
-                                Input_File.close(); 
-                            }
-                            else{
-                                // Do nothing, as this data does not contain the desired value.
-                                cerr << "\n| ERROR | Account value << << does not have a valid value, or there is no present account number matching this value.\n";
                             }
                         }
                     }
                 }
+                Input_File.close();
             }
-            Input_File.close();
+            else{ 
+                cerr << "\n| ERROR | Unable to open 'Account_Info.txt'.";
+            }
+            return {};
         }
-        else{ 
-            cerr << "\n| ERROR | Unable to open 'Account_Info.txt'.";
+
+        void Append_Account_Info(string Acc_Num, string Acc_Name, string Acc_Birthyear, string Acc_Rec_Key, string Acc_PIN_Num){
+            // Variable Initialization
+            int             Acc_Create_Num;
+            string          Format_String;
+            // String Steam type being used to create a string within memory, and then formatting the entire built list into a single string.
+            ostringstream   Str_Stream;
+            /* Output_File used to declare the target file name. If this banking system were implemented into a real world scenario, there would likely need to be multiple files which were able to transfer data back and forth, 
+            to minimize the time needed to scan each file for specific data. For the purposes of this project however, one single file for each different data structure will satisfy the needs. Uses Append mode to open the file, to prevent overwritting.*/
+            ofstream        Output_File(Account_Info_file, ios::app);
+
+            Acc_Create_Num = (Account_Count() + 1);
+            
+
+            Str_Stream << "Acc_Create_Num, [" << Acc_Create_Num << "], Acc_Num, [" << Acc_Num << "], Acc_Name, [" << Acc_Name << "], Acc_Birthyear, [" << Acc_Birthyear << "], Acc_Rec_Key, [" << Acc_Rec_Key << "], Acc_PIN_Num, [" << Acc_PIN_Num << "]";
+            Format_String = Str_Stream.str();
+
+            
+            if(Output_File.is_open()){
+                Output_File << Format_String << "\n";
+                Output_File.close();
+                cout << "\nAccount Data Successfully Output to Account Database! (Account_Info.txt)\n";
+            }
+            else { cerr << "\nData Export Failed!\n"; }
+
         }
-        return(nullopt);
-    }
-
-    void Append_Account_Info(string Acc_Num, string Acc_Name, string Acc_Birthyear, string Acc_Rec_Key, string Acc_PIN_Num){
-        // Variable Initialization
-        int             Acc_Create_Num;
-        string          Format_String;
-        // String Steam type being used to create a string within memory, and then formatting the entire built list into a single string.
-        ostringstream   Str_Stream;
-        /* Output_File used to declare the target file name. If this banking system were implemented into a real world scenario, there would likely need to be multiple files which were able to transfer data back and forth, 
-        to minimize the time needed to scan each file for specific data. For the purposes of this project however, one single file for each different data structure will satisfy the needs. Uses Append mode to open the file, to prevent overwritting.*/
-        ofstream        Output_File(Account_Info_file, ios::app);
-
-        Acc_Create_Num = (Account_Count() + 1);
-        
-
-        Str_Stream << "Acc_Create_Num, [" << Acc_Create_Num << "], Acc_Num, [" << Acc_Num << "], Acc_Name, [" << Acc_Name << "], Acc_Birthyear, [" << Acc_Birthyear << "], Acc_Rec_Key, [" << Acc_Rec_Key << "], Acc_PIN_Num, [" << Acc_PIN_Num << "]";
-        Format_String = Str_Stream.str();
-
-        
-        if(Output_File.is_open()){
-            Output_File << Format_String << "\n";
-            Output_File.close();
-            cout << "\nAccount Data Successfully Output to Account Database! (Account_Info.txt)\n";
-        }
-        else { cerr << "\nData Export Failed!\n"; }
-
-    }
 };
 
 class Utility_Functions
@@ -354,45 +359,18 @@ class Utility_Functions
         int Str_to_Int(string Sample_Input){
             int temp_Variable = 0;
             // Output_Variable used for error checks, if value remains 0 on return, error handling will occur within returned structure.
-            //int Output_Variable = 0;
-            //cout << "ENTERED FUNCTION"; //USED FOR DEBUG
             try{
-                //while(Function_Status == 3){
-                    stringstream ss(Sample_Input);
-                    if(ss >> temp_Variable){
-                        //Output_Variable = stoi(Sample_Input);
-                        //cout << "ENTERED INTEGER"; //USED FOR DEBUG
-                        Function_Status = 1;
-                        return(temp_Variable);
-                        //cout << "\n" << Output_Variable; USED FOR DEBUG
-                    }
-                    else{
-                        Function_Status = 2;
-                        cerr << "| Error | Non-Integer value detected.\n";
-                        return(5);
-                        //throw(invalid_argument("Non-Integer value detected."));
-                        
-                        //ss.clear();
-                        //ss.ignore(numeric_limits<streamsize>::max(), '\n');
-                        //cout << "| Error | Non-Integer value detected : " << Sample_Input << "\n";
-                        //cout << "function still running";
-                        //return(1);
-                        
-                        //return(1);
-                    }
-
-                    //cout << "\n" << Sample_Input; USED FOR DEBUG
-                    //cout << "\n" << Output_Variable; USED FOR DEBUG
-                //}
-            }
-            /*catch(int Err){
-                cerr << "ENTER CATCH";
-                if(Err == 1){
-                    //Function_Status = 1;
-                    cerr << "\n| Fatal Error | Non-Integer value detected.";
+                stringstream Str_Stream(Sample_Input);
+                if(Str_Stream >> temp_Variable){
+                    Function_Status = 1;
+                    return(temp_Variable);
                 }
-                else{ cerr << "| Unknown Error |";}
-            }*/
+                else{
+                    Function_Status = 2;
+                    cerr << "| Error | Non-Integer value detected.\n";
+                    return(5);
+                }
+            }
             catch(const invalid_argument& Err_Code){
                 Function_Status = 2;
                 cerr << "| Error | Invalid Argument! | " << Sample_Input << " |\n\n";
@@ -420,7 +398,6 @@ class Utility_Functions
             mt19937 Rand_Generator(Random());
             // By creating a distribution object, a desired range of values can be set (0-9), this also provides the variable type of int to the compiler.
             uniform_int_distribution<> Random_Range(0, 9);
-
             // for loop is used to grab a randomized int value between the ranges of 0 and 9, and then append it to the Recovery_Key string using +=, for a specified number of iterations.
             for(int i = 0; i < Key_Length; ++i){
                 Recovery_Key += to_string(Random_Range(Rand_Generator));
@@ -673,25 +650,9 @@ class Account_Management : public Utility_Functions, public Database_Management
             return(5);
         }
 
-        // Acc_Create_Step6 used to check that no accounts exist with duplicate essential information, then assigns the Acc_Num to the data set.
+        // Acc_Create_Step6 used to check that no accounts exist with duplicate essential information (only the account number currently), then assigns the Acc_Num to the data set.
         int Acc_Create_Step6(){
             // Variable Initialization
-            /*optional<vector<string>> Acc_Info;
-            string target_temp = "4444444444"; // USED FOR DEBUG
-            //int temp2;
-            //Utility_Functions::Append_Account_Info(1, "John Doe", 2000, 12345678, 1234);
-            Acc_Info = Database_Management::View_Account_Info(0, target_temp);
-            if(Acc_Info.has_value()){
-                cout << "\nAccount found that contains the specified Rec Key.\n";
-                cout << "Vector Value: ";
-                for(const string& output_temp : Acc_Info.value()){
-                    cout << "[" << output_temp << "]";
-                }
-                cout << "\n";
-            }
-            else{
-                cout << "\nAccount not found.\n";
-            }*/ //USED FOR DEBUG
 
             string Acc_Num_temp;
             string Acc_Num_final;
@@ -700,9 +661,10 @@ class Account_Management : public Utility_Functions, public Database_Management
             while(Acc_Num_final.empty()){
                 Acc_Num_temp = (Utility_Functions::Generate_Random_Key(10));
 
-                if(!(Database_Management::View_Account_Info(2, Acc_Num_temp).has_value())){
+                if((Database_Management::View_Account_Info(2, Acc_Num_temp).empty())){
                     // No Account Found with the specified Account Number
                     Acc_Num_final = Acc_Num_temp;
+                    cout << "\n Your Account Number is what you will use to make transactions, and recover your account, this is a randomly generated value, write this down: '" << Acc_Num_final << "'\n";
                 }
                 else{
                     // Account found with account number, do nothing, and continue to check for an avaliable number.
@@ -710,7 +672,7 @@ class Account_Management : public Utility_Functions, public Database_Management
                 
             }
             Database_Management::Append_Account_Info(Acc_Num_final, Acc_Name, Acc_Birthyear, Acc_Rec_Key, Acc_PIN_Num);
-            cout << "\n Function Complete.\n";
+            //cout << "\n Function Complete.\n"; // USED FOR DEBUG
 
             return(7);
         }
@@ -764,26 +726,87 @@ class Account_Management : public Utility_Functions, public Database_Management
         }
 };
 
-// Transaction History | Secondary Class that manages the logging of transaction interactions within each account. This will be fully implemented by final project (chose to delay for creating more essential functions first), with an input/output from a persistant external txt file.
-class Transaction_History : public Account_Management
-{
-    // Retrieve Balance Function used to preform a retrieval of the specified account's balance, given the account number. At this point, the user has already validated who they are.
-    double Retrieve_Balance(int Acc_Num){
-        return(0);
-    }
-};
-
 // User Authentication | Validates Account Information, Authenticates Users into accounts, and Verifies Identity using recovery key and other methods.
 class User_Authentication : public Account_Management
 {
     private:
 
     public:
-    int Acc_Login(){
-        
-        return(1);
-    }
 
+        int Acc_Login(){
+            // Mistake count variable is used to provide a tracking of mistakes for use in the security process for accounts. Can be implemented in future, not necessary for project, would be for real world.
+            //int Mistake_Count = 0;
+            string User_Input;
+            string User_Input_segment;
+            string Acc_Num; 
+            string Acc_PIN_Num;
+            vector<string> Acc_Info;
+            vector<string> User_Input_final;
+
+            cout << "\n| Account Login Menu | - Please enter the Account Number associated with the account you wish to login to, and the PIN Number associated with that account. \nEnter this as a comma seprated list such as (0000000000, 1234).\nEnter the information now: ";
+
+            // User Input
+            cin.clear();
+            User_Input.clear();
+            if(getline(cin, User_Input)){
+                stringstream Str_Stream(User_Input);
+
+                //if(Utility_Functions::is_Int(User_Input)){
+                    //Acc_Num = User_Input.find_first_not_of(",");
+                    //cout << Acc_Num;
+                //}
+                while(getline(Str_Stream, User_Input_segment, ',')){
+                    User_Input_segment = User_Input_segment.substr((User_Input_segment.find_first_not_of(' ')), ((User_Input_segment.find_last_not_of(' ')) - (User_Input_segment.find_first_not_of(' ')) + 1));
+                    User_Input_final.push_back(User_Input_segment);
+                    //cout << "\nsegment\n"; // USED FOR DEBUG
+                }
+                if(User_Input_final.size() == 2){
+                    Acc_Num = User_Input_final[0];
+                    Acc_PIN_Num = User_Input_final[1];
+                    //cout << "Acc_Num: '" << Acc_Num << "' Acc_PIN_Num: '" << Acc_PIN_Num << "'\n"; // USED FOR DEBUG
+                    if((Utility_Functions::is_Int(Acc_Num)) && (Utility_Functions::is_Int(Acc_PIN_Num))){
+                        Acc_Info = Database_Management::View_Account_Info(6, Acc_Num);
+                        if(!(Acc_Info.empty())){
+                            //cout << "Account Info: '" << (Acc_Info[1]) << "' and '" << (Acc_Info[3]) << "'\n"; // USED FOR DEBUG
+                            // if statement will execute under the condition that an account is found with the input value.
+                            if((Acc_Info[3]) == (Acc_PIN_Num)){
+                                // Login Successful!
+                                cout << "\nLogin Successful!\n";
+                                return(4);
+                            }
+                        }
+                        else
+                        {
+                            cerr << "\nUnsuccessful Login, PIN Incorrect!\n";
+                        }
+                    }
+                    else{
+                        cerr << "\n| ERROR | Input value is not of the requried type (integer).\n";
+                    }
+                }
+                else{
+                    cerr << "\n| ERROR | User Input Invalid, too many parts to the list!\n";
+                    return(1);
+                }
+
+            }
+            else{ 
+                cerr << "\n| ERROR | User Input Failed.\n";
+                return(1); 
+            }
+
+            return(4);
+        }
+
+};
+
+// Transaction History | Secondary Class that manages the logging of transaction interactions within each account. This will be fully implemented by final project (chose to delay for creating more essential functions first), with an input/output from a persistant external txt file.
+class Transaction_History : public User_Authentication
+{
+    // Retrieve Balance Function used to preform a retrieval of the specified account's balance, given the account number. At this point, the user has already validated who they are.
+    double Retrieve_Balance(int Acc_Num){
+        return(0);
+    }
 };
 
 // This 'Banking_Interface' gives the options of Accessing an existing account, creating an entirely new account, or recovering an account from a key that is assigned to a profile.
@@ -840,7 +863,7 @@ class Banking_Interface : public User_Authentication
             while(User_Action == 2){
                 temp_Var = Account_Management::Acc_Create();
                 if(temp_Var == 1){
-                    cout << "\nAccount Creation Successful, thank you, " << Acc_Name << ".";
+                    cout << "\nAccount Creation Successful. Thank you, " << Acc_Name << ".";
                     //prepare for data output to txt file here (using external function)
                     temp_Var = 0;
                     return(3);
@@ -865,15 +888,6 @@ class Banking_Interface : public User_Authentication
             }
             return(2);
         }
-        /*catch(int Err_Code){
-            if(Err_Code == 1){
-                cout << "| ERROR! | No choice selected, or invalid input, type a number!\nResetting Console...\n\n";
-            }
-        }*/
-        /*catch(...){
-            cout << "Unknown Error\n";
-            Interface_Start_Text();
-        }*/
 };
 
 int main()
