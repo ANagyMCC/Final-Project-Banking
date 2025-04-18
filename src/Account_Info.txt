@@ -1,1 +1,5 @@
-
+Acc_Create_Num, [1], Acc_Num, [3822124730], Acc_Name, [JOHN DOE], Acc_Birthyear, [1956], Acc_Rec_Key, [56789986], Acc_PIN_Num, [1234]
+Acc_Create_Num, [2], Acc_Num, [4323232132], Acc_Name, [JAKIE DOE], Acc_Birthyear, [1956], Acc_Rec_Key, [87656345], Acc_PIN_Num, [4324]
+Acc_Create_Num, [3], Acc_Num, [6546568563], Acc_Name, [MIKE PIECE], Acc_Birthyear, [1956], Acc_Rec_Key, [75623412], Acc_PIN_Num, [0001]
+Acc_Create_Num, [4], Acc_Num, [3956278323], Acc_Name, [SALLIE PALLIE], Acc_Birthyear, [1979], Acc_Rec_Key, [12345634], Acc_PIN_Num, [1235]
+Acc_Create_Num, [5], Acc_Num, [5395453946], Acc_Name, [NIKOLA TESLA], Acc_Birthyear, [1956], Acc_Rec_Key, [79436990], Acc_PIN_Num, [3692]
