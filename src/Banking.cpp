@@ -487,7 +487,7 @@ class Database_Management : public Utility_Functions
             if(Input_File.is_open()){
                 while(getline(Input_File, Data_line)){
                     // Checks that data is of value [A#] and not [T#]
-                    if(Data_line.find("[A1]") == 0){
+                    if(Data_line.find("[A") == 0){
                         // Process of data within a string stream
                         stringstream Str_Stream(Data_line);
                         Acc_Data.clear();
@@ -528,7 +528,7 @@ class Database_Management : public Utility_Functions
             return {};
         }
 
-        void Append_Balance_Info(string Acc_Num, string Acc_Balance){
+        /*void Append_Balance_Info(string Acc_Num, string Acc_Balance){
             // Variable Initialization
 
             int             Trans_Data_Iteration;
@@ -538,8 +538,6 @@ class Database_Management : public Utility_Functions
             vector<string>  Account_Iteration_Data;
             // String Steam type being used to create a string within memory, and then formatting the entire built list into a single string.
             ostringstream   Str_Stream;
-            /* Output_File used to declare the target file name. If this banking system were implemented into a real world scenario, there would likely need to be multiple files which were able to transfer data back and forth, 
-            to minimize the time needed to scan each file for specific data. For the purposes of this project however, one single file for each different data structure will satisfy the needs. Uses Append mode to open the file, to prevent overwritting.*/
             ofstream        Output_File(Account_Trans_file, ios::app);
 
             Account_Iteration_Data = Database_Management::View_Account_Info(7, "3822124730");
@@ -558,7 +556,7 @@ class Database_Management : public Utility_Functions
             }
             else { cerr << "\nData Export Failed!\n"; }
 
-        }
+        }*/
 };
 
 // Account Management | Primary Class that handles account information such as creating, deleting, managing, merging, and other operations.
@@ -959,7 +957,13 @@ class User_Authentication : public Transaction_History
                                 // Login Successful! | ACCOUNT MENU |
                                 cout << "\nLogin Successful!";
                                 Acc_Balance = to_string(Trans_Hist.Retrieve_Balance(Acc_Num));
-                                cout << "\nYou currently have an avalaible balance of : '$" << Acc_Balance << "'";
+                                if(Acc_Balance == "-1"){
+                                    cerr << "\n| Error | Balance Retrieval failed.\n";
+                                }
+                                else{
+                                    cout << "\nYou currently have an avalaible balance of: '$" << Acc_Balance << "'\n";
+                                }
+                                // continue on here for any other login options.
 
                                 return(2);
                             }
@@ -1104,7 +1108,7 @@ int main()
     // Starting Processes
     Acc_Manage.Acc_Clear_Info();
 
-    //Acc_Manage.Acc_Create_Step6();
+    //Acc_Manage.Acc_Create_Step6(); // USED FOR DEBUG
     //double temp; // USED FOR DEBUG
     //temp = Trans_Hist.Retrieve_Balance("3822124730"); // USED FOR DEBUG
     //cout << "\n" << temp << "\n"; // USED FOR DEBUG
@@ -1122,7 +1126,7 @@ int main()
             Interface.User_Action = 0;
         }
         while(Program_Status == 3){
-            // temp output of 4 to continue to normal process (WIP).
+            // Recovery Function will require modification functions for the txt file, This would be the next step in development of this project.
             Program_Status = 4;
         }
         if(Program_Status == 4){
