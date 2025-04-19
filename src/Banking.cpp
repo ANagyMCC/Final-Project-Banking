@@ -961,7 +961,7 @@ class User_Authentication : public Transaction_History
                                 Acc_Balance = to_string(Trans_Hist.Retrieve_Balance(Acc_Num));
                                 cout << "\nYou currently have an avalaible balance of : '$" << Acc_Balance << "'";
 
-                                return(4);
+                                return(2);
                             }
                         }
                         else
@@ -1042,6 +1042,13 @@ class Banking_Interface : public Transaction_History
             while(User_Action == 1){
                 temp_Var = User_Auth.Acc_Login();
                 //cerr << "\n temp_var: " << temp_Var << "\n"; // USED FOR DEBUG
+                if(temp_Var == 2){
+                    //Successful login/balance output.
+                    return(3);
+                }
+                else{
+                    cerr << "\nInvalid output, resetting login.\n";
+                }
 
             }
             // User Action 2 | Access Account
