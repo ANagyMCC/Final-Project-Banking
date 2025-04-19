@@ -1,9 +1,7 @@
 // Anthony Nagy | COMS-280-WWW02 | Final Project
 #include <iostream>
 #include <string>
-//#include <typeinfo>
 #include <algorithm>
-//#include <chrono>
 #include <sstream>
 #include <ctime>
 #include <format>
@@ -32,9 +30,7 @@ class Utility_Functions
             
             // strftime used to convert the local time data structure into a more readable format, with only the neccessary information.
             strftime(local_Year, sizeof(local_Year), "%Y", local_Time);
-            //cout << "\n 2: DEBUG START | " << local_Year << " | END\n "; USED FOR DEBUG
             Final_Result = Str_to_Int(local_Year);
-            //cout << "\n 3: DEBUG START | " << Final_Result << " | END\n "; USED FOR DEBUG
             return(Final_Result);
         }
 
@@ -227,7 +223,6 @@ class Database_Management : public Utility_Functions
 
             // Length check of second parameter, to provide multi-usability of the function.
             Value_Target = target_Data_Value.length();
-            //cout << "\nValue_Target (Length): " << Value_Target << "\n"; // USED FOR DEBUG
             if(Value_Target == 1){
                 // Single value within Data Value likely executing a command that counts the amount of a specific data field.
                 Acc_Data_Value = "1 CHAR";
@@ -243,12 +238,10 @@ class Database_Management : public Utility_Functions
             else if(Value_Target == 10){
                 // Value length of 10 is equal to an Account Number.
                 Acc_Data_Value = "10 CHAR";
-                //cout << "\n10 CHAR!\n";  // USED FOR DEBUG
             }
             else{
                 cerr << "\n| ERROR | Data Value out of range of possible parameters.\n";
             }
-            //cout << "\n Acc_Data_Value = " << Acc_Data_Value << "\n Value Target = " << Value_Target << "\n"; // USED FOR DEBUG
 
             // Identifiers used to convert the short-hand target field to the string identifiers that is used within the txt document, used to specify actions for a desired vector/data field.
             if(target_Vector_Field == 1){
@@ -262,14 +255,9 @@ class Database_Management : public Utility_Functions
                 }
                 else { cerr << "\nFailed Execution of getting count of accounts.\n"; }
             }
-            else if(target_Vector_Field == 2){
+            if(target_Vector_Field == 2){
                 Acc_Data_Field = "Acc_Num";
-                //Function_Status = 2;
-                // If statement used to describe the behavior of the function, given a specfic target_Data_value.
-                //if((processed_Data_Value >= (Acc_Num_Min_Value)) && (processed_Data_Value <= (Acc_Num_Max_Value))){
-                    // target_Data_Value being equal to a possibly valid account number, will check all lines of data within the database file, to check for an account matching the input value (Used for making sure duplicates don't exist).
-                //}
-                //else{ cerr << "| ERROR | Account out of range"; }
+                // If statement used to describe the behavior of the function, given a specfic Char length for the target_Data_Value.
                 if(Acc_Data_Value == "10 CHAR"){
                     Acc_Data_Value = "Acc_Num";
                 }
@@ -277,7 +265,6 @@ class Database_Management : public Utility_Functions
             }
             else if(target_Vector_Field == 3){
                 Acc_Data_Field = "Acc_Name";
-                //Function_Status = 3;
                 // No current Use
             }
             else if(target_Vector_Field == 4){
@@ -288,10 +275,6 @@ class Database_Management : public Utility_Functions
                 // RECOVERY KEY, Only for use with Account recovery methods. On is output to compare customer given value to value within database.
                 Acc_Data_Field = "Acc_Rec_Key";
                 // If statement used to describe the behavior of the function, given a specfic target_Data_value.
-                //if((processed_Data_Value >= (Rec_Key_Min_Value)) && (processed_Data_Value <= (Rec_Key_Max_Value))){
-                    // target_Data_Value being equal to a possibly valid Account Recovery Key, will check all lines of data within the database file, to check for an account matching the recovery key, will result in the output of a vector containing only the Recovery_Key and Acc_Num.
-
-                //}
                 if(Acc_Data_Value == "8 CHAR"){
                     Data_Restriction = 1;
                 }
@@ -303,11 +286,7 @@ class Database_Management : public Utility_Functions
                 
                 // Only output data if checking that a specific account numbers' pin number is equal to that of what is in the database.
                 // Acc_Data_Field = "Acc_PIN_Num";
-                // If statement used to describe the behavior of the function, given a specfic target_Data_value.
-                //if(processed_Data_Value == 0){
-
-                //}
-                //else{ cerr << "\nPIN Numbers cannot be viewed after becoming the active PIN for an account. If your account needs to be recovered, pick that option within the login menu.\n"; }
+                // If statement used to describe the behavior of the function, given a specfic Char length for the target_Data_Value.
                 if(Acc_Data_Value == "10 CHAR"){
                     Acc_Data_Field = "Acc_Num";
                     Data_Restriction = 2;
@@ -319,11 +298,7 @@ class Database_Management : public Utility_Functions
                 
                 // Only output data if checking that a specific account numbers' pin number is equal to that of what is in the database.
                 // Acc_Data_Field = "Acc_PIN_Num";
-                // If statement used to describe the behavior of the function, given a specfic target_Data_value.
-                //if(processed_Data_Value == 0){
-
-                //}
-                //else{ cerr << "\nPIN Numbers cannot be viewed after becoming the active PIN for an account. If your account needs to be recovered, pick that option within the login menu.\n"; }
+                // If statement used to describe the behavior of the function, given a specfic Char length for the target_Data_Value.
                 if(Acc_Data_Value == "10 CHAR"){
                     Acc_Data_Field = "Acc_Num";
                     Account_Count_Val = -1;
@@ -333,11 +308,7 @@ class Database_Management : public Utility_Functions
             }
             else if(target_Vector_Field == 0){
                 // All basic values will be displayed within the output variable
-                // If statement used to describe the behavior of the function, given a specfic target_Data_value.
-                //if((processed_Data_Value >= (Acc_Num_Min_Value)) && (processed_Data_Value <= (Acc_Num_Max_Value))){
-                    // target_Data_value being equal to a valid account number within the database will result in the output of the general information of an account.
-
-                //}
+                // If statement used to describe the behavior of the function, given a specfic Char length for the target_Data_Value.
                 if(Acc_Data_Value == "10 CHAR"){
                     // Account Lookup method used with an account number to output general info.
                     Acc_Data_Field = "Acc_Num";
@@ -347,7 +318,6 @@ class Database_Management : public Utility_Functions
                 else{ cerr << "\nNo valid input for General Account lookup.\n"; }
             }
             else{
-                //cerr << "\n| ERROR | Invalid Target Data Field, or out of valid range: \n" << target_Vector_Field << ".\n"; // USED FOR DEBUG
                 // Do nothing, Line does not contain target data, continue.
             }
 
@@ -367,22 +337,16 @@ class Database_Management : public Utility_Functions
                         }
                         else{
                         // Append 
-                        //cout << "Append1"; // USED FOR DEBUG
                         Acc_Data.push_back(Data_segment);
                         }
                     }
                     for(size_t i = 0; i < Acc_Data.size(); ++ i){
-                        //cout << "FOR LOOP" << i << "\n"; // USED FOR DEBUG
                         if((Acc_Data[i]) == Acc_Data_Field){
                             if(i + 1 < Acc_Data.size()){
-                                //cout << "\nEnter1"; // USED FOR DEBUG
                                 current_Acc_Data = Acc_Data[(i + 1)];
                                 if (current_Acc_Data.has_value() && (current_Acc_Data.value() == target_Data_Value)){ 
-                                    //cout << "\nEnter2;"; // USED FOR DEBUG
-                                    
                                     if(Data_Restriction == 0){
                                         // Acc_Data_final will only include the data fields perscribed by the data restriction status. (Basic Info) [includes Acc_Num, Acc_Name, Acc_Birthyear, and Acc_Num]
-                                        //cout << "\nRestriction 1 Detected"; // USED FOR DEBUG
                                         Acc_Data_final.resize(6);
                                         Acc_Data_final[0] = (Acc_Data[2]);
                                         Acc_Data_final[1] = (Acc_Data[3]);
@@ -393,10 +357,7 @@ class Database_Management : public Utility_Functions
                                         return(Acc_Data_final);
                                     }
                                     else if(Data_Restriction == 1){
-                                        //cout << "\nRestriction 2 Detected"; // USED FOR DEBUG
-                                        //string temp_var;
                                         // Acc_Data_final will only include the data fields perscribed by the data restriction status. (Protected Info) [includes Acc_Num and Acc_Rec_Key]
-                                        //temp_var = ((Acc_Data[2]) + (Acc_Data[3]) + );
                                         Acc_Data_final.resize(4);
                                         Acc_Data_final[0] = (Acc_Data[2]);
                                         Acc_Data_final[1] = (Acc_Data[3]);
@@ -405,7 +366,6 @@ class Database_Management : public Utility_Functions
                                         return(Acc_Data_final);
                                     }
                                     else if(Data_Restriction == 2){
-                                        //cout << "\nRestriction 2 Output Attempted"; // USED FOR DEBUG
                                         // Acc_Data_final will only include the data fields perscribed by the data restriction status. (Processing Info) [includes Acc_Num and Acc_PIN_Num]
                                         Acc_Data_final.resize(4);
                                         Acc_Data_final[0] = (Acc_Data[2]);
@@ -426,7 +386,6 @@ class Database_Management : public Utility_Functions
                                 }
                                 else{
                                     // Do nothing, as this data does not contain the desired value.
-                                    //cerr << "\nValue not found within line.\n"; // USED FOR DEBUG
                                 }
                             }
                         }
@@ -503,11 +462,8 @@ class Database_Management : public Utility_Functions
                             Acc_Data.push_back(Data_segment);
                         }
                         for(size_t i = 0; i < Acc_Data.size(); ++ i){
-                            //cout << "FOR LOOP" << i << "\n"; // USED FOR DEBUG
                             if((Acc_Data[i] == "Acc_Num") && ((i + 1) < Acc_Data.size())){
-                                //cout << "\nEnter1"; // USED FOR DEBUG
                                 if (Acc_Data[i + 1] == target_Acc_Num){ 
-                                    //cout << "\nEnter2;"; // USED FOR DEBUG
                                     Acc_Data_final.resize(2);
                                     Acc_Data_final[0] = (Acc_Data[2]);
                                     Acc_Data_final[1] = (Acc_Data[4]);
@@ -655,12 +611,9 @@ class Account_Management : public Database_Management
             //
             transform(Acc_Name.begin(), Acc_Name.end(), Acc_Name.begin(), ::toupper);
             Name_Length = Acc_Name.length();
-            
-            //cout << Name_Length; USED FOR DEBUG
 
             // For loop used to identify each char within the name, counting space's, and detecting any characters not considered 'legal' within the context.
             for(int Char_Val : Acc_Name){
-                //cout << Char_Val << " \n"; USED FOR DEBUG
                 if(static_cast<int>(Char_Val) == 32){
                     Name_Space_Count++;
                 }
@@ -669,7 +622,6 @@ class Account_Management : public Database_Management
                 // Check to determine if a specific char within the Acc_Name string is the value of ' or `, increments the Alpha_Count int variable, used as a counter.
                 else if((static_cast<int>(Char_Val) == 39) || (static_cast<int>(Char_Val) == 96)){ Alpha_Count++; }
                 // Used the comment below to track the ASCII value of each char, giving me the specific value to target to and debug the error checks for the name string.
-                //cout << "\nYour name contains " << Name_Space << " Spaces."; USED FOR DEBUG
 
                 // If all other checks fail, the program returns an error, due to a specific char in the Acc_Name string not being considered a legal character.
                 else{
@@ -718,7 +670,6 @@ class Account_Management : public Database_Management
                     // Processing
                     if(Util_Func.is_Int(User_Input)){
                         Acc_Birthyear = User_Input;
-                        //cout << "\nYear is an int!"; //USED FOR DEBUG
                         cout << "\nThe current year is " << Util_Func.Current_Year_int << ".\n";
 
                         Acc_Birthage = ((Util_Func.Current_Year_int)-(Util_Func.Str_to_Int(Acc_Birthyear)));
@@ -733,7 +684,6 @@ class Account_Management : public Database_Management
                         }
                         Util_Func.Function_Status = 0;
                         return(4);
-                        //cout << "SUCCESS2!"; // USED FOR DEBUG
                     }
                     else if(Util_Func.Function_Status == 2){ return(3); }
                     else{
@@ -820,7 +770,6 @@ class Account_Management : public Database_Management
                 
             }
             Database_Management::Append_Account_Info(Acc_Num_final, Acc_Name, Acc_Birthyear, Acc_Rec_Key, Acc_PIN_Num);
-            //cout << "\n Function Complete.\n"; // USED FOR DEBUG
 
             return(7);
         }
@@ -837,18 +786,15 @@ class Account_Management : public Database_Management
             while((Step_Status == 1)){
                 // Acc_Create_Step1() is used to provide a disclaimer to ensure the user understands what they must enter. A successful and valid input will continue to the next step.
                 Step_Status = Acc_Create_Step1();
-                //cout << "\n" << Step_Status; //USED FOR DEBUG
                 
             }
             while((Step_Status == 2)){
                 // Acc_Create_Step2() is used to gather the name of the customer that is to be used in the account creation process. A successful and valid input will continue to the next step.
                 Step_Status = Acc_Create_Step2();
-                //cout << "\n" << Step_Status; //USED FOR DEBUG
             }
             while((Step_Status == 3)){
                 // Acc_Create_Step3() is used to gather the birth year of the customer that is to be used in the account creation process. A successful and valid input will continue to the next step.
                 Step_Status = Acc_Create_Step3();
-                //cout << "\n" << Step_Status; //USED FOR DEBUG
             }
             while((Step_Status == 4)){
                 // Acc_Create_Step4() is used to generate and provide the user with a randomized recovery key for secure access to their account. A successful and valid input will continue to the next step.
@@ -885,7 +831,6 @@ class Transaction_History : public Account_Management
             vector<string> Acc_Info;
             Acc_Info = Database_Management::View_Balance_Info(Acc_Num);
             if(!(Acc_Info.empty())){
-                //cout << "\nBalance Output for account '" << Acc_Num << "' : '" << Acc_Info[1] << "'.\n"; // USED FOR DEBUG
                 if(Acc_Num == Acc_Info[0]){
                     return(Util_Func.Str_to_Double(Acc_Info[1]));
                 }
@@ -934,24 +879,16 @@ class User_Authentication : public Transaction_History
             User_Input.clear();
             if(getline(cin, User_Input)){
                 stringstream Str_Stream(User_Input);
-
-                //if(Utility_Functions::is_Int(User_Input)){
-                    //Acc_Num = User_Input.find_first_not_of(",");
-                    //cout << Acc_Num;
-                //}
                 while(getline(Str_Stream, User_Input_segment, ',')){
                     User_Input_segment = User_Input_segment.substr((User_Input_segment.find_first_not_of(' ')), ((User_Input_segment.find_last_not_of(' ')) - (User_Input_segment.find_first_not_of(' ')) + 1));
                     User_Input_final.push_back(User_Input_segment);
-                    //cout << "\nsegment\n"; // USED FOR DEBUG
                 }
                 if(User_Input_final.size() == 2){
                     Acc_Num = User_Input_final[0];
                     Acc_PIN_Num = User_Input_final[1];
-                    //cout << "Acc_Num: '" << Acc_Num << "' Acc_PIN_Num: '" << Acc_PIN_Num << "'\n"; // USED FOR DEBUG
                     if((Util_Func.is_Int(Acc_Num)) && (Util_Func.is_Int(Acc_PIN_Num))){
                         Acc_Info = Database_Management::View_Account_Info(6, Acc_Num);
                         if(!(Acc_Info.empty())){
-                            //cout << "Account Info: '" << (Acc_Info[1]) << "' and '" << (Acc_Info[3]) << "'\n"; // USED FOR DEBUG
                             // if statement will execute under the condition that an account is found with the input value.
                             if((Acc_Info[3]) == (Acc_PIN_Num)){
                                 // Login Successful! | ACCOUNT MENU |
@@ -1045,7 +982,6 @@ class Banking_Interface : public Transaction_History
             // User Action 1 | Access Account
             while(User_Action == 1){
                 temp_Var = User_Auth.Acc_Login();
-                //cerr << "\n temp_var: " << temp_Var << "\n"; // USED FOR DEBUG
                 if(temp_Var == 2){
                     //Successful login/balance output.
                     return(3);
@@ -1068,6 +1004,7 @@ class Banking_Interface : public Transaction_History
             // User Action 1 | Access Account
             while(User_Action == 3){
                 //(Recovery)Create after accounts
+                User_Action = 4;
             }
             // User Action 1 | Access Account
             while(User_Action == 4){
@@ -1108,18 +1045,11 @@ int main()
     // Starting Processes
     Acc_Manage.Acc_Clear_Info();
 
-    //Acc_Manage.Acc_Create_Step6(); // USED FOR DEBUG
-    //double temp; // USED FOR DEBUG
-    //temp = Trans_Hist.Retrieve_Balance("3822124730"); // USED FOR DEBUG
-    //cout << "\n" << temp << "\n"; // USED FOR DEBUG
-
     // Main Proccesses
     while(Program_Status != 0){
         while(Program_Status == 1){
             // Begin Program by starting the inteface interaction function.
-            //int Output = Util_Func.get_Current_Year_int(); USED FOR DEBUG
             Program_Status = Interface.Interface_Start_Text();
-            //Interface.User_Action = 0;
         }
         while(Program_Status == 2){
             Program_Status = Interface.Interface_Start_Interact();
