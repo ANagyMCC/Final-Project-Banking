@@ -14,17 +14,162 @@
 #include <optional>
 #include <cctype>
 
-//#include "Account_Balance.txt"
-//#include "Account_Info.txt"
-
 using namespace std;
 
 // Incode 'Acc' refers to 'Account'
 // Debug for Return Values are as follows: | return(0) = Program Exit | return(1) = Default Value(TBD) | return(2) = Success/Verified/Valid | return(3) = Invalid/Input-Error/General-Error | return(4,5,6,7) = Verification for Accounts/Recovery Process
 
-class Database_Management
+class Utility_Functions
 {
     private:
+        // Will Implement MM/DD/YYYY input if enough time later.
+        int get_Current_Year_int(){
+            int Final_Result;
+            time_t current_Time = time(0);
+            tm* local_Time = localtime(&current_Time);
+            // char type array used to store the year.
+            char local_Year[5];
+            
+            // strftime used to convert the local time data structure into a more readable format, with only the neccessary information.
+            strftime(local_Year, sizeof(local_Year), "%Y", local_Time);
+            //cout << "\n 2: DEBUG START | " << local_Year << " | END\n "; USED FOR DEBUG
+            Final_Result = Str_to_Int(local_Year);
+            //cout << "\n 3: DEBUG START | " << Final_Result << " | END\n "; USED FOR DEBUG
+            return(Final_Result);
+        }
+
+    protected:
+
+    public:
+        /*
+        Func Status Indications (used to allow for further control over how the program operates.)
+        Func Status = 0 | Default Execution/Null Execution
+        Func Status = 1 | Successful Execution
+        Func Status = 2 | Failed Execution / Error Handling Executed
+        Func Status = 3 | Start/Restart Status (Indicator for class functions to check before starting (neccessary to prevent memory overloading))
+        */
+        int Function_Status = 0;
+        // Integer variable used to store the current year for external processing.
+        int Current_Year_int = get_Current_Year_int();
+
+        bool is_Int(string Sample_Input){
+            bool b_Result;
+            if(Sample_Input.empty()){
+                b_Result = false;
+                return(b_Result);
+            }
+
+            for(char temp : Sample_Input){
+                if(!isdigit(temp) && temp != '-' && temp != '+' && temp != '*' && temp != '/'){
+                    b_Result = false;
+                    return(b_Result);
+                }
+            }
+
+            b_Result = true;
+            return(b_Result);
+        }
+        
+        template <typename I>
+        bool is_Int(const I& Sample_Input){
+            bool b_Result = false;
+            b_Result = (is_integral<I>::value);
+            return(b_Result);
+        }
+
+        // Str_to_Int converts a user input into a usable format for interpretation of integer values, while allowing for error checks.
+        int Str_to_Int(string Sample_Input){
+            int temp_Variable = 0;
+            // Output_Variable used for error checks, if value remains 0 on return, error handling will occur within returned structure.
+            try{
+                stringstream Str_Stream(Sample_Input);
+                if(Str_Stream >> temp_Variable){
+                    Function_Status = 1;
+                    return(temp_Variable);
+                }
+                else{
+                    Function_Status = 2;
+                    cerr << "| Error | Non-Integer value detected.\n";
+                    return(5);
+                }
+            }
+            catch(const invalid_argument& Err_Code){
+                Function_Status = 2;
+                cerr << "| Error | Invalid Argument! | " << Sample_Input << " |\n\n";
+                return(5);
+            }
+            catch (const out_of_range& Err_Code){
+                Function_Status = 2;
+                cerr << "| Error | Out of Range!" << Err_Code.what() << "\n\n";
+                return(5);
+            }
+            catch(...){
+                Function_Status = 2;
+                cerr << "| Unknown Error - Inside 'Utility_Functions' |\n";
+                return(5);
+            }
+        }
+
+        double Str_to_Double(string Sample_Input){
+            double temp_Variable = 0;
+            // Output_Variable used for error checks, if value remains 0 on return, error handling will occur within returned structure.
+            try{
+                stringstream Str_Stream(Sample_Input);
+                if(Str_Stream >> temp_Variable){
+                    Function_Status = 1;
+                    return(temp_Variable);
+                }
+                else{
+                    Function_Status = 2;
+                    cerr << "| Error | Non-Double value detected.\n";
+                    return(5);
+                }
+            }
+            catch(const invalid_argument& Err_Code){
+                Function_Status = 2;
+                cerr << "| Error | Invalid Argument! | " << Sample_Input << " |\n\n";
+                return(5);
+            }
+            catch (const out_of_range& Err_Code){
+                Function_Status = 2;
+                cerr << "| Error | Out of Range!" << Err_Code.what() << "\n\n";
+                return(5);
+            }
+            catch(...){
+                Function_Status = 2;
+                cerr << "| Unknown Error - Inside 'Utility_Functions' |\n";
+                return(5);
+            }
+        }
+
+        string Generate_Random_Key(int Key_Length){
+            // Initialize Variables
+            string Recovery_Key = "";
+            random_device Random;
+
+            // Process
+            // A non-deterministic random number generator that uses the randomness inherent in the OS and hardware.
+            mt19937 Rand_Generator(Random());
+            // By creating a distribution object, a desired range of values can be set (0-9), this also provides the variable type of int to the compiler.
+            uniform_int_distribution<> Random_Range(0, 9);
+            // for loop is used to grab a randomized int value between the ranges of 0 and 9, and then append it to the Recovery_Key string using +=, for a specified number of iterations.
+            for(int i = 0; i < Key_Length; ++i){
+                Recovery_Key += to_string(Random_Range(Rand_Generator));
+            }
+
+            // Uninitialize possible memory intensive operations.
+            ~Rand_Generator();
+
+            // Return Complete Recovery_Key.
+            return(Recovery_Key);
+        }
+};
+
+// Chose Persistant Storage Methods instead of dynamically allocated for absolute control over the flow, execution, exception handling, and other features of the program.
+class Database_Management : public Utility_Functions
+{
+    private:
+        Utility_Functions Util_Func;
         const string    Account_Info_file = "Account_Info.txt";
         const string    Account_Trans_file = "Account_Transactions.txt";
     
@@ -68,7 +213,8 @@ class Database_Management
             int                 Function_Status = 0;
             // Data Restriciton Variable controls what data is returned within the vector, changing to 2-3 different values to represent Basic Info(0), Protected Info(1), and Processing Info(2)
             int                 Data_Restriction = 0;
-
+            int                 Account_Count_Val = 0;
+            
 
             optional<string>    current_Acc_Data;
             // Vector used to contain multiple different accounts worth of data.
@@ -169,6 +315,22 @@ class Database_Management
                 }
                 else{ cerr << "\n| ERROR | Gathering of PIN not Successful.\n"; }
             }
+            else if(target_Vector_Field == 7){
+                
+                // Only output data if checking that a specific account numbers' pin number is equal to that of what is in the database.
+                // Acc_Data_Field = "Acc_PIN_Num";
+                // If statement used to describe the behavior of the function, given a specfic target_Data_value.
+                //if(processed_Data_Value == 0){
+
+                //}
+                //else{ cerr << "\nPIN Numbers cannot be viewed after becoming the active PIN for an account. If your account needs to be recovered, pick that option within the login menu.\n"; }
+                if(Acc_Data_Value == "10 CHAR"){
+                    Acc_Data_Field = "Acc_Num";
+                    Account_Count_Val = -1;
+                    //cout << "Restriction Set to 2";  // USED FOR DEBUG
+                }
+                else{ cerr << "\n| ERROR | Gathering of PIN not Successful.\n"; }
+            }
             else if(target_Vector_Field == 0){
                 // All basic values will be displayed within the output variable
                 // If statement used to describe the behavior of the function, given a specfic target_Data_value.
@@ -252,6 +414,14 @@ class Database_Management
                                         Acc_Data_final[3] = (Acc_Data[11]);
                                         return(Acc_Data_final);
                                     }
+                                    else if(Account_Count_Val == (-1)){
+                                        Acc_Data_final.resize(4);
+                                        Acc_Data_final[0] = (Acc_Data[0]);
+                                        Acc_Data_final[1] = (Acc_Data[1]);
+                                        Acc_Data_final[2] = (Acc_Data[2]);
+                                        Acc_Data_final[3] = (Acc_Data[3]);
+                                        return(Acc_Data_final);
+                                    }
                                     Input_File.close(); 
                                 }
                                 else{
@@ -295,127 +465,107 @@ class Database_Management
             else { cerr << "\nData Export Failed!\n"; }
 
         }
-};
-
-class Utility_Functions
-{
-    private:
-        // Will Implement MM/DD/YYYY input if enough time later.
-        int get_Current_Year_int(){
-            int Final_Result;
-            time_t current_Time = time(0);
-            tm* local_Time = localtime(&current_Time);
-            // char type array used to store the year.
-            char local_Year[5];
-            
-            // strftime used to convert the local time data structure into a more readable format, with only the neccessary information.
-            strftime(local_Year, sizeof(local_Year), "%Y", local_Time);
-            //cout << "\n 2: DEBUG START | " << local_Year << " | END\n "; USED FOR DEBUG
-            Final_Result = Str_to_Int(local_Year);
-            //cout << "\n 3: DEBUG START | " << Final_Result << " | END\n "; USED FOR DEBUG
-            return(Final_Result);
-        }
-
-    protected:
-    /*
-    Func Status Indications (used to allow for further control over how the program operates.)
-    Func Status = 0 | Default Execution/Null Execution
-    Func Status = 1 | Successful Execution
-    Func Status = 2 | Failed Execution / Error Handling Executed
-    Func Status = 3 | Start/Restart Status (Indicator for class functions to check before starting (neccessary to prevent memory overloading))
-    */
-    int Function_Status = 0;
-
-    public:
-        // Integer variable used to store the current year for external processing.
-        int Current_Year_int = get_Current_Year_int();
-
-        bool is_Int(string Sample_Input){
-            bool b_Result;
-            if(Sample_Input.empty()){
-                b_Result = false;
-                return(b_Result);
-            }
-
-            for(char temp : Sample_Input){
-                if(!isdigit(temp) && temp != '-' && temp != '+' && temp != '*' && temp != '/'){
-                    b_Result = false;
-                    return(b_Result);
-                }
-            }
-
-            b_Result = true;
-            return(b_Result);
-        }
         
-        template <typename I>
-        bool is_Int(const I& Sample_Input){
-            bool b_Result = false;
-            b_Result = (is_integral<I>::value);
-            return(b_Result);
+        vector<string> View_Balance_Info(string target_Acc_Num){
+            // Variable Initialization
+            string              Data_line;
+            string              Data_segment;
+            string              Acc_Data_Field;
+            string              Acc_Data_Value = "";
+            // Value_Target variable used to control the flow of the function, given a specific type and length of the target_Data_Value.
+            int                 Value_Target;
+            // Function_Status is used to control which values are removed, used in conjunction with Data_Restriction.
+            int                 Function_Status = 0;
+            // Data Restriciton Variable controls what data is returned within the vector, changing to 2-3 different values to represent Basic Info(0), Protected Info(1), and Processing Info(2)
+            int                 Data_Restriction = 0;
+            // Vector used to contain a single account worth of data.
+            vector<string>      Acc_Data;
+            vector<string>      Acc_Data_final;
+            // ifstream Input_File creates a stream object, and attempts to open "Account_Info.txt"
+            ifstream            Input_File(Account_Trans_file);
+
+            if(Input_File.is_open()){
+                while(getline(Input_File, Data_line)){
+                    // Checks that data is of value [A#] and not [T#]
+                    if(Data_line.find("[A1]") == 0){
+                        // Process of data within a string stream
+                        stringstream Str_Stream(Data_line);
+                        Acc_Data.clear();
+                        while(getline(Str_Stream, Data_segment, ',')){
+                            // Trims the container blocks (,) used to seperate the data of the accounts. Output is more suitable for processing within code.
+                            Data_segment.erase(0, Data_segment.find_first_not_of(" "));
+                            Data_segment.erase((Data_segment.find_last_not_of(" ") + 1));
+                            // Trims the container blocks ([ and ]) used to hold data of the account, 
+                            if((Data_segment.front() == '[') && (Data_segment.back() == ']')){
+                                Data_segment = Data_segment.substr(1, (Data_segment.length() - 2));
+                                
+                            }
+                            Acc_Data.push_back(Data_segment);
+                        }
+                        for(size_t i = 0; i < Acc_Data.size(); ++ i){
+                            //cout << "FOR LOOP" << i << "\n"; // USED FOR DEBUG
+                            if((Acc_Data[i] == "Acc_Num") && ((i + 1) < Acc_Data.size())){
+                                //cout << "\nEnter1"; // USED FOR DEBUG
+                                if (Acc_Data[i + 1] == target_Acc_Num){ 
+                                    //cout << "\nEnter2;"; // USED FOR DEBUG
+                                    Acc_Data_final.resize(2);
+                                    Acc_Data_final[0] = (Acc_Data[2]);
+                                    Acc_Data_final[1] = (Acc_Data[4]);
+                                    // ACC_Data_final includes Acc_Num and Acc_Balance
+                                    Input_File.close(); 
+                                    return(Acc_Data_final);
+                                }
+                            Input_File.close();
+                            }
+                        }
+                    }
+                }
+                Input_File.close();
+            }
+            else{ 
+                cerr << "\n| ERROR | Unable to open 'Account_Info.txt'.";
+            }
+            return {};
         }
 
-        // Str_to_Int converts a user input into a usable format for interpretation of integer values, while allowing for error checks.
-        int Str_to_Int(string Sample_Input){
-            int temp_Variable = 0;
-            // Output_Variable used for error checks, if value remains 0 on return, error handling will occur within returned structure.
-            try{
-                stringstream Str_Stream(Sample_Input);
-                if(Str_Stream >> temp_Variable){
-                    Function_Status = 1;
-                    return(temp_Variable);
-                }
-                else{
-                    Function_Status = 2;
-                    cerr << "| Error | Non-Integer value detected.\n";
-                    return(5);
-                }
-            }
-            catch(const invalid_argument& Err_Code){
-                Function_Status = 2;
-                cerr << "| Error | Invalid Argument! | " << Sample_Input << " |\n\n";
-                return(5);
-            }
-            catch (const out_of_range& Err_Code){
-                Function_Status = 2;
-                cerr << "| Error | Out of Range!" << Err_Code.what() << "\n\n";
-                return(5);
-            }
-            catch(...){
-                Function_Status = 2;
-                cerr << "| Unknown Error - Inside 'Utility_Functions' |\n";
-                return(5);
-            }
-        }
+        void Append_Balance_Info(string Acc_Num, string Acc_Balance){
+            // Variable Initialization
 
-        string Generate_Random_Key(int Key_Length){
-            // Initialize Variables
-            string Recovery_Key = "";
-            random_device Random;
+            int             Trans_Data_Iteration;
+            string          Trans_Iteration_input;
+            string          Format_String;
+            string          Iteration_Identifier;
+            vector<string>  Account_Iteration_Data;
+            // String Steam type being used to create a string within memory, and then formatting the entire built list into a single string.
+            ostringstream   Str_Stream;
+            /* Output_File used to declare the target file name. If this banking system were implemented into a real world scenario, there would likely need to be multiple files which were able to transfer data back and forth, 
+            to minimize the time needed to scan each file for specific data. For the purposes of this project however, one single file for each different data structure will satisfy the needs. Uses Append mode to open the file, to prevent overwritting.*/
+            ofstream        Output_File(Account_Trans_file, ios::app);
 
-            // Process
-            // A non-deterministic random number generator that uses the randomness inherent in the OS and hardware.
-            mt19937 Rand_Generator(Random());
-            // By creating a distribution object, a desired range of values can be set (0-9), this also provides the variable type of int to the compiler.
-            uniform_int_distribution<> Random_Range(0, 9);
-            // for loop is used to grab a randomized int value between the ranges of 0 and 9, and then append it to the Recovery_Key string using +=, for a specified number of iterations.
-            for(int i = 0; i < Key_Length; ++i){
-                Recovery_Key += to_string(Random_Range(Rand_Generator));
+            Account_Iteration_Data = Database_Management::View_Account_Info(7, "3822124730");
+            Trans_Iteration_input = Account_Iteration_Data[1];
+            Trans_Data_Iteration = (Util_Func.Str_to_Int(Trans_Iteration_input) + 1);
+            
+
+            Str_Stream << "[" << Iteration_Identifier << "], Acc_Num, [" << Acc_Num << "], Acc_Balance, [" << Acc_Balance << "]";
+            Format_String = Str_Stream.str();
+
+            
+            if(Output_File.is_open()){
+                Output_File << Format_String << "\n";
+                Output_File.close();
+                cout << "\nAccount Data Successfully Output to Account Database! (Account_Info.txt)\n";
             }
+            else { cerr << "\nData Export Failed!\n"; }
 
-            // Uninitialize possible memory intensive operations.
-            ~Rand_Generator();
-
-            // Return Complete Recovery_Key.
-            return(Recovery_Key);
         }
 };
 
 // Account Management | Primary Class that handles account information such as creating, deleting, managing, merging, and other operations.
-class Account_Management : public Utility_Functions, public Database_Management
+class Account_Management : public Database_Management
 {
     private:
-        
+        Utility_Functions Util_Func;
 
     protected:
         // Account Creation Number | Used by the bank for internal use, to identify how many members are active at the bank, and to award the Xth customer for chosing this bank.
@@ -568,12 +718,12 @@ class Account_Management : public Utility_Functions, public Database_Management
                 
                 if(getline(cin, User_Input)){
                     // Processing
-                    if(Utility_Functions::is_Int(User_Input)){
+                    if(Util_Func.is_Int(User_Input)){
                         Acc_Birthyear = User_Input;
-                        cout << "\nYear is an int!"; //USED FOR DEBUG
-                        cout << "\nThe current year is " << Utility_Functions::Current_Year_int << ".\n";
+                        //cout << "\nYear is an int!"; //USED FOR DEBUG
+                        cout << "\nThe current year is " << Util_Func.Current_Year_int << ".\n";
 
-                        Acc_Birthage = ((Utility_Functions::Current_Year_int)-(Utility_Functions::Str_to_Int(Acc_Birthyear)));
+                        Acc_Birthage = ((Util_Func.Current_Year_int)-(Util_Func.Str_to_Int(Acc_Birthyear)));
                         cout << Acc_Name << " is approximately " << Acc_Birthage << " years old.\n";
                         if (Acc_Birthage == 0){
                             cerr << "\n| Error | Empty or Invalid input.";
@@ -583,11 +733,11 @@ class Account_Management : public Utility_Functions, public Database_Management
                             cerr << "\n| Error | Birthyear out of realistic range.";
                             return(3);
                         }
-                        Function_Status = 0;
+                        Util_Func.Function_Status = 0;
                         return(4);
                         //cout << "SUCCESS2!"; // USED FOR DEBUG
                     }
-                    else if(Utility_Functions::Function_Status == 2){ return(3); }
+                    else if(Util_Func.Function_Status == 2){ return(3); }
                     else{
                         cerr << "User Input is not an integer!";
                         return(3);
@@ -603,7 +753,7 @@ class Account_Management : public Utility_Functions, public Database_Management
             
             // Process
             // Random_Recovery_Key variable being set to the output of the randomly generated, 8 digit long key.
-            Acc_Rec_Key = Utility_Functions::Generate_Random_Key(8);
+            Acc_Rec_Key = Util_Func.Generate_Random_Key(8);
             cout << "\nYour randomized account recovery key is: "<< Acc_Rec_Key << ". \nThis 'Recovery Key' is the backup key you will need to provide; if you lose the passcode you are about to enter, and need to reset it, or otherwise need to recover your account.\n";
 
             return(5);
@@ -620,7 +770,7 @@ class Account_Management : public Utility_Functions, public Database_Management
             if(getline(cin, User_Input)){
                 // Processing & Error Handling
                 // Calling the is_Int 'Utility' Function to provide error handling for the user input, unless the Input is successful, the Acc_Create_Step5() function will restart with cleared values.
-                if(Utility_Functions::is_Int(User_Input)){
+                if(Util_Func.is_Int(User_Input)){
                     if(User_Input.length() == 4){
                         Acc_PIN_Num = User_Input;
                         return(6);
@@ -629,7 +779,7 @@ class Account_Management : public Utility_Functions, public Database_Management
                         cerr << "| ERROR | Entered PIN Number, '" << User_Input << "', is not four in length, as required.\n\n";
                         return(5);
                     }
-                    Utility_Functions::Function_Status = 0;
+                    Util_Func.Function_Status = 0;
                 }
                 else
                 { 
@@ -659,7 +809,7 @@ class Account_Management : public Utility_Functions, public Database_Management
             
             Acc_Num_final.clear();
             while(Acc_Num_final.empty()){
-                Acc_Num_temp = (Utility_Functions::Generate_Random_Key(10));
+                Acc_Num_temp = (Util_Func.Generate_Random_Key(10));
 
                 if((Database_Management::View_Account_Info(2, Acc_Num_temp).empty())){
                     // No Account Found with the specified Account Number
@@ -726,8 +876,41 @@ class Account_Management : public Utility_Functions, public Database_Management
         }
 };
 
+// Transaction History | Secondary Class that manages the logging of transaction interactions within each account. This will be fully implemented by final project (chose to delay for creating more essential functions first), with an input/output from a persistant external txt file.
+class Transaction_History : public Account_Management
+{   
+    private:
+        Utility_Functions Util_Func;
+    public:
+    // Retrieve Balance Function used to preform a retrieval of the specified account's balance, given the account number. At this point, the user has already validated who they are.
+    double Retrieve_Balance(string Acc_Num){
+            vector<string> Acc_Info;
+            Acc_Info = Database_Management::View_Balance_Info(Acc_Num);
+            if(!(Acc_Info.empty())){
+                //cout << "\nBalance Output for account '" << Acc_Num << "' : '" << Acc_Info[1] << "'.\n"; // USED FOR DEBUG
+                if(Acc_Num == Acc_Info[0]){
+                    return(Util_Func.Str_to_Double(Acc_Info[1]));
+                }
+                else{
+                    cerr << "\n| ERROR | Balance Retrieval failed.\n";
+                    return(-1);
+                }
+            }
+            else{
+                cerr << "\n| ERROR | Balance Retrieval Failed!\n";
+            }
+
+        return(-1);
+    }
+    // Retrieve_Transaction function is used to get the details of a specific transaction, given a transaction ID, and an account number involved with said transaction.
+    /*double Retrieve_Transaction(string Trans_Number, string Acc_Num){
+    
+        return(0);
+    }*/
+};
+
 // User Authentication | Validates Account Information, Authenticates Users into accounts, and Verifies Identity using recovery key and other methods.
-class User_Authentication : public Account_Management
+class User_Authentication : public Transaction_History
 {
     private:
 
@@ -740,8 +923,11 @@ class User_Authentication : public Account_Management
             string User_Input_segment;
             string Acc_Num; 
             string Acc_PIN_Num;
+            string Acc_Balance;
             vector<string> Acc_Info;
             vector<string> User_Input_final;
+            Transaction_History Trans_Hist;
+            Utility_Functions Util_Func;
 
             cout << "\n| Account Login Menu | - Please enter the Account Number associated with the account you wish to login to, and the PIN Number associated with that account. \nEnter this as a comma seprated list such as (0000000000, 1234).\nEnter the information now: ";
 
@@ -764,14 +950,17 @@ class User_Authentication : public Account_Management
                     Acc_Num = User_Input_final[0];
                     Acc_PIN_Num = User_Input_final[1];
                     //cout << "Acc_Num: '" << Acc_Num << "' Acc_PIN_Num: '" << Acc_PIN_Num << "'\n"; // USED FOR DEBUG
-                    if((Utility_Functions::is_Int(Acc_Num)) && (Utility_Functions::is_Int(Acc_PIN_Num))){
+                    if((Util_Func.is_Int(Acc_Num)) && (Util_Func.is_Int(Acc_PIN_Num))){
                         Acc_Info = Database_Management::View_Account_Info(6, Acc_Num);
                         if(!(Acc_Info.empty())){
                             //cout << "Account Info: '" << (Acc_Info[1]) << "' and '" << (Acc_Info[3]) << "'\n"; // USED FOR DEBUG
                             // if statement will execute under the condition that an account is found with the input value.
                             if((Acc_Info[3]) == (Acc_PIN_Num)){
-                                // Login Successful!
-                                cout << "\nLogin Successful!\n";
+                                // Login Successful! | ACCOUNT MENU |
+                                cout << "\nLogin Successful!";
+                                Acc_Balance = to_string(Trans_Hist.Retrieve_Balance(Acc_Num));
+                                cout << "\nYou currently have an avalaible balance of : '$" << Acc_Balance << "'";
+
                                 return(4);
                             }
                         }
@@ -795,25 +984,17 @@ class User_Authentication : public Account_Management
                 return(1); 
             }
 
-            return(4);
+            return(1);
         }
 
 };
 
-// Transaction History | Secondary Class that manages the logging of transaction interactions within each account. This will be fully implemented by final project (chose to delay for creating more essential functions first), with an input/output from a persistant external txt file.
-class Transaction_History : public User_Authentication
-{
-    // Retrieve Balance Function used to preform a retrieval of the specified account's balance, given the account number. At this point, the user has already validated who they are.
-    double Retrieve_Balance(int Acc_Num){
-        return(0);
-    }
-};
-
 // This 'Banking_Interface' gives the options of Accessing an existing account, creating an entirely new account, or recovering an account from a key that is assigned to a profile.
-class Banking_Interface : public User_Authentication
+class Banking_Interface : public Transaction_History
 {
     private:
         string User_Input;
+        Utility_Functions Util_Func;
         
     protected:
 
@@ -831,9 +1012,9 @@ class Banking_Interface : public User_Authentication
 
                 // Processing & Error Handling
                 // Calling the is_Int 'Utility' Function to provide error handling for the user input, unless the Input is successful, it will restart the entire Interface_Start_Text() function.
-                if(Utility_Functions::is_Int(User_Input)){
-                    User_Action = Str_to_Int(User_Input);
-                    Utility_Functions::Function_Status = 0;
+                if(Util_Func.is_Int(User_Input)){
+                    User_Action = Util_Func.Str_to_Int(User_Input);
+                    Util_Func.Function_Status = 0;
                     return(2);
                 }
                 else
@@ -855,9 +1036,13 @@ class Banking_Interface : public User_Authentication
             // integer temp_Var is used to assist with error checking between functions.
             int temp_Var = 0;
 
+            User_Authentication User_Auth;
+
             // User Action 1 | Access Account
             while(User_Action == 1){
-                temp_Var = User_Authentication::Acc_Login();
+                temp_Var = User_Auth.Acc_Login();
+                //cerr << "\n temp_var: " << temp_Var << "\n"; // USED FOR DEBUG
+
             }
             // User Action 2 | Access Account
             while(User_Action == 2){
@@ -913,6 +1098,9 @@ int main()
     Acc_Manage.Acc_Clear_Info();
 
     //Acc_Manage.Acc_Create_Step6();
+    //double temp; // USED FOR DEBUG
+    //temp = Trans_Hist.Retrieve_Balance("3822124730"); // USED FOR DEBUG
+    //cout << "\n" << temp << "\n"; // USED FOR DEBUG
 
     // Main Proccesses
     while(Program_Status != 0){
